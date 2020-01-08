@@ -87,7 +87,7 @@ public class MNistTraining {
 //        neuralNetworkProperties.put(Constants.LOSS_FUNCTION, "MeanSquaredError");
 
         neuralNetworkProperties.put(Constants.BATCH_SIZE, 128);
-        neuralNetworkProperties.put(Constants.MAX_EPOCH, 1000000);
+        neuralNetworkProperties.put(Constants.MAX_EPOCH, 100);
 
         Configuration configuration = new Configuration(neuralNetworkProperties);
         try {

@@ -18,18 +18,18 @@ public class HiddenLayer extends Layer {
 
     @Override
     public float[][] forwardPropagation() {
-        MatrixManipulator.debugMatrix(layerName + " input:", input);
-        MatrixManipulator.debugMatrix(layerName + " weight:", weight);
+//        MatrixManipulator.debugMatrix(layerName + " input:", input);
+//        MatrixManipulator.debugMatrix(layerName + " weight:", weight);
 
         A = MatrixManipulator.multiply(input, weight);
-        MatrixManipulator.debugMatrix(layerName + " A:", A);
+//        MatrixManipulator.debugMatrix(layerName + " A:", A);
 
         Z = activationFunction.activate(A);
-        MatrixManipulator.debugMatrix(layerName + " Z:", Z);
+//        MatrixManipulator.debugMatrix(layerName + " Z:", Z);
 
         // add column of ones in the very beginning of the matrix
         float[][] outMatrix = MatrixManipulator.addColumnOfOnes(Z);
-        MatrixManipulator.debugMatrix(layerName + " input [*After Adding Column of Ones*]:", outMatrix);
+//        MatrixManipulator.debugMatrix(layerName + " input [*After Adding Column of Ones*]:", outMatrix);
 
         return nextLayer.input(outMatrix)
                 .forwardPropagation();
@@ -37,17 +37,17 @@ public class HiddenLayer extends Layer {
 
     @Override
     public void backPropagation(float[][] prevCostPrime) {
-
+//logger.info("HERE 7.1");
         float[][] primeA = activationFunction.activatePrime(A);
-        MatrixManipulator.debugMatrix(layerName + " A prime: ", primeA);
-
-        MatrixManipulator.debugMatrix(layerName + " prevCostPrime: ", prevCostPrime);
+//        MatrixManipulator.debugMatrix(layerName + " A prime: ", primeA);
+//logger.info("HERE 7.2");
+//        MatrixManipulator.debugMatrix(layerName + " prevCostPrime: ", prevCostPrime);
         float[][] costOutputPrime = MatrixManipulator.multiplyEntries(prevCostPrime, primeA);
-        MatrixManipulator.debugMatrix(layerName + " costOutputPrime: ", costOutputPrime);
-
+//        MatrixManipulator.debugMatrix(layerName + " costOutputPrime: ", costOutputPrime);
+//logger.info("HERE 7.3");
         logger.debug("{} BackPropagation calculateDeltaWeight ...", layerName);
         calculateDeltaWeight(costOutputPrime);
-
+//logger.info("HERE 7.4");
         logger.debug("{} BackPropagation prepareErrorCostThenBackPropagate ...", layerName);
         prepareErrorCostThenBackPropagate(costOutputPrime);
     }

@@ -85,15 +85,18 @@ public abstract class Layer {
         MatrixManipulator.initializeMatrix(deltaWeight, 0f);
 
         for (int i = 0; i < input.length; i++) {
+//            logger.info("HERE 7.3.1");
             float[][] in = MatrixManipulator.transposeMatrix(MatrixManipulator.vectorToMatrix(input[i]));
             float[][] out = MatrixManipulator.vectorToMatrix(costOutputPrime[i]);
-
-            MatrixManipulator.debugMatrix(layerName + " in: ", in);
-            MatrixManipulator.debugMatrix(layerName + " out: ", out);
-
+//            logger.info("HERE 7.3.2");
+//            MatrixManipulator.debugMatrix(layerName + " in: ", in);
+//            MatrixManipulator.debugMatrix(layerName + " out: ", out);
+//            logger.info("HERE 7.3.3");
             float[][] dWeights = MatrixManipulator.multiply(in, out);
-            MatrixManipulator.debugMatrix(layerName + " dWeights: ", dWeights);
+//            MatrixManipulator.debugMatrix(layerName + " dWeights: ", dWeights);
+//            logger.info("HERE 7.3.4");
             accumulateDeltaWeights(dWeights);
+//            logger.info("HERE 7.3.5");
         }
 
         // get mean weights
@@ -102,7 +105,7 @@ public abstract class Layer {
                 deltaWeight[i][j] /= costOutputPrime.length; // number of examples
             }
         }
-        MatrixManipulator.debugMatrix(layerName + " deltaWeight: ", deltaWeight);
+//        MatrixManipulator.debugMatrix(layerName + " deltaWeight: ", deltaWeight);
     }
 
     protected void prepareErrorCostThenBackPropagate(float[][] costOutputPrime) {
@@ -113,11 +116,11 @@ public abstract class Layer {
             // prepare the costPrime for the previous layer for cost error back propagation
             float[][] weightTranspose = MatrixManipulator.transposeMatrix(weight);
             costPrime = MatrixManipulator.multiply(costOutputPrime, weightTranspose);
-            MatrixManipulator.debugMatrix(layerName + " costPrime: ", costPrime);
+//            MatrixManipulator.debugMatrix(layerName + " costPrime: ", costPrime);
 
             // eliminate the first col as it is for bias
             costPrime = MatrixManipulator.removeFirstColumn(costPrime);
-            MatrixManipulator.debugMatrix(layerName + " costPrime [*First column removed]:", costPrime);
+//            MatrixManipulator.debugMatrix(layerName + " costPrime [*First column removed]:", costPrime);
         }
 
         logger.debug("Back-propagate to the next layer");
@@ -137,7 +140,7 @@ public abstract class Layer {
 
     public Layer input(float[][] input) {
         this.input = input;
-        MatrixManipulator.debugMatrix(layerName + " received input: ", input);
+//        MatrixManipulator.debugMatrix(layerName + " received input: ", input);
 
         return this;
     }

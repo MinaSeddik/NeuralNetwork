@@ -20,7 +20,7 @@ public class InputLayer extends Layer {
     public float[][] forwardPropagation() {
         // add column of ones in the very beginning of the matrix
         float[][] outMatrix = MatrixManipulator.addColumnOfOnes(input);
-        MatrixManipulator.debugMatrix(layerName + " input [*After Adding Column of Ones*]:", outMatrix);
+//        MatrixManipulator.debugMatrix(layerName + " input [*After Adding Column of Ones*]:", outMatrix);
 
         return nextLayer.input(outMatrix)
                 .forwardPropagation();

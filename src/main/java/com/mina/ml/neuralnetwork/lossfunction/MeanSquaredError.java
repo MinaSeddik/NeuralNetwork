@@ -14,11 +14,11 @@ public class MeanSquaredError extends LossFunction {
 
     @Override
     public float[][] errorCost(float[][] labels, float[][] output) {
-        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCost received labels: ", labels);
-        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCost received output: ", output);
-
-        MatrixManipulator.printMatrix("MeanSquaredError calculates errorCost received labels: ", labels);
-        MatrixManipulator.printMatrix("MeanSquaredError calculates errorCost received output: ", output);
+//        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCost received labels: ", labels);
+//        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCost received output: ", output);
+//
+//        MatrixManipulator.printMatrix("MeanSquaredError calculates errorCost received labels: ", labels);
+//        MatrixManipulator.printMatrix("MeanSquaredError calculates errorCost received output: ", output);
 
         // make sure that the both matrices have the same dimension
         assert (labels != null);
@@ -35,15 +35,15 @@ public class MeanSquaredError extends LossFunction {
             }
         }
 
-        MatrixManipulator.debugMatrix("MeanSquaredError calculated costs: ", costs);
-        MatrixManipulator.printMatrix("MeanSquaredError calculated costs: ", costs);
+//        MatrixManipulator.debugMatrix("MeanSquaredError calculated costs: ", costs);
+//        MatrixManipulator.printMatrix("MeanSquaredError calculated costs: ", costs);
         return costs;
     }
 
     @Override
     public float[][] errorOutputPrime(float[][] labels, float[][] output, ActivationFunction activationFunction) {
-        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCostPrime received labels: ", labels);
-        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCostPrime received output: ", output);
+//        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCostPrime received labels: ", labels);
+//        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCostPrime received output: ", output);
 
         // make sure that the both matrices have the same dimension
         assert (labels != null);
@@ -60,7 +60,7 @@ public class MeanSquaredError extends LossFunction {
             }
         }
 
-        MatrixManipulator.debugMatrix("MeanSquaredError calculated costPrimes: ", outputPrime);
+//        MatrixManipulator.debugMatrix("MeanSquaredError calculated costPrimes: ", outputPrime);
         return outputPrime;
     }
 

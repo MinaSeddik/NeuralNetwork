@@ -17,8 +17,8 @@ public class CrossEntropyLoss extends LossFunction {
 
     @Override
     public float[][] errorCost(float[][] labels, float[][] output) {
-        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCost received labels: ", labels);
-        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCost received output: ", output);
+//        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCost received labels: ", labels);
+//        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCost received output: ", output);
 
 //        MatrixManipulator.printMatrix("CrossEntropyLoss calculates errorCost received labels: ", labels);
 //        MatrixManipulator.printMatrix("CrossEntropyLoss calculates errorCost received output: ", output);
@@ -56,15 +56,15 @@ public class CrossEntropyLoss extends LossFunction {
 //            }
         }
 
-        MatrixManipulator.debugMatrix("CrossEntropyLoss calculated costs: ", costs);
+//        MatrixManipulator.debugMatrix("CrossEntropyLoss calculated costs: ", costs);
 //        MatrixManipulator.printMatrix("CrossEntropyLoss calculated costs: ", costs);
         return costs;
     }
 
     @Override
     public float[][] errorOutputPrime(float[][] labels, float[][] output, ActivationFunction activationFunction) {
-        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCostPrime received labels: ", labels);
-        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCostPrime received output: ", output);
+//        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCostPrime received labels: ", labels);
+//        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCostPrime received output: ", output);
 
         // make sure that the both matrices have the same dimension
         assert (labels != null);
@@ -87,7 +87,7 @@ public class CrossEntropyLoss extends LossFunction {
             }
         }
 
-        MatrixManipulator.debugMatrix("CrossEntropyLoss calculated costPrimes: ", outputPrime);
+//        MatrixManipulator.debugMatrix("CrossEntropyLoss calculated costPrimes: ", outputPrime);
         return outputPrime;
     }
 

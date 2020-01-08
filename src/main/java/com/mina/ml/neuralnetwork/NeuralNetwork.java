@@ -1,5 +1,6 @@
 package com.mina.ml.neuralnetwork;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.mina.ml.neuralnetwork.factory.LossFunctionFactory;
 import com.mina.ml.neuralnetwork.layer.HiddenLayer;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -141,61 +143,124 @@ public class NeuralNetwork {
         int epochNumber = 1;
         double meanErrorPerEpoch;
         List<Double> errorsPerEpoch = new ArrayList<>();
+        Stopwatch stopwatch = Stopwatch.createStarted();
         do {
+//            logger.info("Number of batches = {}", inputBatches.size());
+//            logger.debug("Number of batches = {}", inputBatches.size());
+//            Stopwatch sw = Stopwatch.createStarted();
 
-            logger.debug("Number of batches = {}", inputBatches.size());
+
+
+            stopwatch = Stopwatch.createStarted();
+            logger.info("Epoch " + epochNumber + "/" + maxEpoch);
             for (int batch = 0; batch < inputBatches.size(); batch++) {
+//logger.info("HERE 1");
+//                logger.debug("Prepare Input batch Id = [{}]", batch);
+                logger.info("Prepare Input batch Id = [{}]", batch);
 
-                logger.debug("Prepare Input batch Id = [{}]", batch);
+
+
+
+
                 List<float[]> inputBatch = inputBatches.get(batch);
                 float[][] in = new float[inputBatch.size()][];
                 in = inputBatch.toArray(in);
 
-                logger.debug("Prepare Output batch Id = [{}]", batch);
+//sw.stop();
+//long t = sw.elapsed(TimeUnit.MICROSECONDS);
+//logger.info("HERE 2 - timeElapsed = " + t);
+//sw.reset();
+//                logger.debug("Prepare Output batch Id = [{}]", batch);
                 List<float[]> outputBatch = outputBatches.get(batch);
                 float[][] labels = new float[outputBatch.size()][];
                 labels = outputBatch.toArray(labels);
-
-                logger.debug("Start Forward propagation for batch Id = [{}]", batch);
+//sw.stop();
+//t = sw.elapsed(TimeUnit.MICROSECONDS);
+//logger.info("HERE 3 - timeElapsed = " + t);
+//sw.reset();
+//                logger.debug("Start Forward propagation for batch Id = [{}]", batch);
                 float[][] output = inputLayer.input(in).forwardPropagation();
-                logger.debug("Finish Forward propagation for batch Id = [{}]", batch);
+//                logger.debug("Finish Forward propagation for batch Id = [{}]", batch);
+//logger.info("HERE 4");
+
+
+//sw.stop();
+//t = sw.elapsed(TimeUnit.MICROSECONDS);
+//logger.info("HERE 4 - timeElapsed = " + t);
+//sw.reset();
+
 
                 double meanError = lossFunction.reducedMeanError(labels, output);
 //System.out.println("*-*-*-* " + meanError);
-                logger.debug("Mean Error for batch Id [{}] = {}", batch, meanError);
-logger.info("Mean Error for batch Id [{}] = {}", batch, meanError);
-//batch=3000000;
-//epochNumber=3000000;
-                errorsPerEpoch.add(meanError);
+//logger.info("HERE 5");
+//                logger.debug("Mean Error for batch Id [{}] = {}", batch, meanError);
+//                logger.info("Mean Error for batch Id [{}] = {}", batch, meanError);
 
+//sw.stop();
+//t = sw.elapsed(TimeUnit.MICROSECONDS);
+//logger.info("HERE 5 - timeElapsed = " + t);
+//sw.reset();
+
+
+                errorsPerEpoch.add(meanError);
+//logger.info("HERE 6");
                 // back propagation
-                logger.debug("Start Back propagation for batch Id = [{}]", batch);
+//                logger.debug("Start Back propagation for batch Id = [{}]", batch);
                 float[][] costOutputPrime = lossFunction.errorOutputPrime(labels, output,
                         outputLayer.getActivationFunction());
+//logger.info("HERE 7");
+
+
+//sw.stop();
+//t = sw.elapsed(TimeUnit.MICROSECONDS);
+//logger.info("HERE 6 - timeElapsed = " + t);
+//sw.reset();
+
 
                 outputLayer.backPropagation(costOutputPrime);
-                logger.debug("Finish Back propagation for batch Id = [{}]", batch);
+//                logger.debug("Finish Back propagation for batch Id = [{}]", batch);
+//logger.info("HERE 8");
+
+
+//sw.stop();
+//t = sw.elapsed(TimeUnit.MICROSECONDS);
+//logger.info("HERE 7 - timeElapsed = " + t);
+//sw.reset();
+
 
                 // update Weight for all neural nodes
-                logger.debug("Update Weights for batch Id = [{}]", batch);
+//                logger.debug("Update Weights for batch Id = [{}]", batch);
                 inputLayer.updateWeights();
+//logger.info("HERE 9");
 
+//sw.stop();
+//t = sw.elapsed(TimeUnit.MICROSECONDS);
+//logger.info("HERE 8 - timeElapsed = " + t);
+//sw.reset();
+//
+//System.exit(0);
             }
 
             meanErrorPerEpoch = errorsPerEpoch.stream()
                     .collect(Collectors.summarizingDouble(Double::doubleValue))
                     .getAverage();
 
-            String report = String.format("Epoch [ %7d ] Mean Error = %.9f", epochNumber, meanErrorPerEpoch);
-            System.out.println(report);
-            logger.debug(report);
+//            String report = String.format("Epoch [ %7d ] Mean Error = %.9f", epochNumber, meanErrorPerEpoch);
+//            System.out.println(report);
+//            logger.debug(report);
 
             errorsPerEpoch.clear();
-            logger.debug("errorsPerEpoch List cleared, size = {}", errorsPerEpoch.size());
+//            logger.debug("errorsPerEpoch List cleared, size = {}", errorsPerEpoch.size());
+
+            stopwatch.stop();
+            long timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
+
+
+            logger.info(" - " + timeElapsed + " + s - loss: 0.3798 - acc: 0.8637 - val_loss: 0.4116 - val_acc: 0.8400");
 
             epochNumber++;
 
-        } while (epochNumber <= maxEpoch && Math.abs(meanErrorPerEpoch - EPSILON) > EPSILON );
+        } while (epochNumber <= maxEpoch && Math.abs(meanErrorPerEpoch - EPSILON) > EPSILON);
 
     }
 

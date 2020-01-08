@@ -15,7 +15,7 @@ public abstract class LossFunction {
     public double reducedMeanError(float[][] labels, float[][] output) {
         float[][] costs = errorCost(labels, output);
 
-        MatrixManipulator.debugMatrix("Reduced Mean Error Matrix:", costs);
+//        MatrixManipulator.debugMatrix("Reduced Mean Error Matrix:", costs);
 //        MatrixManipulator.printMatrix("Reduced Mean Error Matrix:", costs);
         assert (costs[0].length == 1);
 

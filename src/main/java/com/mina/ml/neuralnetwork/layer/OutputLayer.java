@@ -18,14 +18,14 @@ public class OutputLayer extends Layer {
 
     @Override
     public float[][] forwardPropagation() {
-        MatrixManipulator.debugMatrix(layerName + " input:", input);
-        MatrixManipulator.debugMatrix(layerName + " weight:", weight);
+//        MatrixManipulator.debugMatrix(layerName + " input:", input);
+//        MatrixManipulator.debugMatrix(layerName + " weight:", weight);
 
         A = MatrixManipulator.multiply(input, weight);
-        MatrixManipulator.debugMatrix(layerName + " A:", A);
+//        MatrixManipulator.debugMatrix(layerName + " A:", A);
 
         Z = activationFunction.activate(A);
-        MatrixManipulator.debugMatrix(layerName + " Z:", Z);
+//        MatrixManipulator.debugMatrix(layerName + " Z:", Z);
 
         return Z;
     }

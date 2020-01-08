@@ -1,0 +1,9 @@
+/.idea/
+/target/
+/neuralnetwork.log.1
+/neuralnetwork.log.2
+/neuralnetwork.log.3
+/neuralnetwork.log.4
+/neuralnetwork.log.5
+/neuralnetwork.log
+*.iml
