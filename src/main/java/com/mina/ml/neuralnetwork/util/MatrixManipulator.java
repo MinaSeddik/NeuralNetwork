@@ -19,18 +19,40 @@ public class MatrixManipulator {
     private final static int NUM_OF_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
     private static ExecutorService executor = Executors.newFixedThreadPool(NUM_OF_PROCESSORS);
-    private static ExecutorService executor2 = Executors.newFixedThreadPool(NUM_OF_PROCESSORS);
 
-    public static float[][] addColumnOfOnes(float[][] input) {
-        float[][] matrix = new float[input.length][input[0].length + 1];
+    public static void addColumnOfOnes(float[][] input, float[][] result, int startIndex, int endIndex) {
 
-        for (int row = 0; row < input.length; row++) {
-            matrix[row][0] = 1f;
-            for (int i = 1, j = 0; i < matrix[0].length && j < input[0].length; i++, j++) {
-                matrix[row][i] = input[row][j];
+        for (int row = startIndex; row < endIndex; row++) {
+            result[row][0] = 1f;
+            for (int i = 1, j = 0; i < result[0].length && j < input[0].length; i++, j++) {
+                result[row][i] = input[row][j];
             }
         }
-        return matrix;
+
+    }
+
+    public static float[][] addColumnOfOnes(float[][] input) {
+        float[][] result = new float[input.length][input[0].length + 1];
+
+        List<Future<?>> futures = IntStream.range(0, NUM_OF_PROCESSORS)
+                .mapToObj(p -> {
+                    Future<?> future = executor.submit(() -> addColumnOfOnes(input, result,
+                            p * (input.length / NUM_OF_PROCESSORS),
+                            p == NUM_OF_PROCESSORS ?
+                                    input.length :
+                                    p * (input.length / NUM_OF_PROCESSORS) + (input.length / NUM_OF_PROCESSORS)));
+                    return future;
+                }).collect(Collectors.toList());
+
+        futures.forEach(f -> {
+            try {
+                f.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                throw new RuntimeException("Exception: " + ex.getClass() + " " + ex.getMessage());
+            }
+        });
+
+        return result;
     }
 
     public static float[][] multiply_singleThread(float[][] matrix1, float[][] matrix2) {
@@ -101,14 +123,37 @@ public class MatrixManipulator {
         }
     }
 
-    public static float[][] transposeMatrix(float[][] matrix) {
-        float[][] result = new float[matrix[0].length][matrix.length];
+    public static void transposeMatrix(float[][] matrix, float[][] result, int startIndex, int endIndex) {
 
-        for (int i = 0; i < matrix.length; i++) {
+        for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
                 result[j][i] = matrix[i][j];
             }
         }
+
+    }
+
+
+    public static float[][] transposeMatrix(float[][] matrix) {
+        float[][] result = new float[matrix[0].length][matrix.length];
+
+        List<Future<?>> futures = IntStream.range(0, NUM_OF_PROCESSORS)
+                .mapToObj(p -> {
+                    Future<?> future = executor.submit(() -> transposeMatrix(matrix, result,
+                            p * (matrix.length / NUM_OF_PROCESSORS),
+                            p == NUM_OF_PROCESSORS ?
+                                    matrix.length :
+                                    p * (matrix.length / NUM_OF_PROCESSORS) + (matrix.length / NUM_OF_PROCESSORS)));
+                    return future;
+                }).collect(Collectors.toList());
+
+        futures.forEach(f -> {
+            try {
+                f.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                throw new RuntimeException("Exception: " + ex.getClass() + " " + ex.getMessage());
+            }
+        });
 
         return result;
     }
@@ -123,17 +168,40 @@ public class MatrixManipulator {
         return result;
     }
 
-    public static float[][] removeFirstColumn(float[][] matrix) {
-        float[][] result = new float[matrix.length][matrix[0].length - 1];
+    public static void removeFirstColumn(float[][] matrix, float[][] result, int startIndex, int endIndex) {
 
-        for (int i = 0; i < matrix.length; i++) {
+        for (int i = startIndex; i < endIndex; i++) {
             for (int j = 1; j < matrix[0].length; j++) {
                 result[i][j - 1] = matrix[i][j];
             }
         }
+    }
+
+
+    public static float[][] removeFirstColumn(float[][] matrix) {
+        float[][] result = new float[matrix.length][matrix[0].length - 1];
+
+        List<Future<?>> futures = IntStream.range(0, NUM_OF_PROCESSORS)
+                .mapToObj(p -> {
+                    Future<?> future = executor.submit(() -> removeFirstColumn(matrix, result,
+                            p * (matrix.length / NUM_OF_PROCESSORS),
+                            p == NUM_OF_PROCESSORS ?
+                                    matrix.length :
+                                    p * (matrix.length / NUM_OF_PROCESSORS) + (matrix.length / NUM_OF_PROCESSORS)));
+                    return future;
+                }).collect(Collectors.toList());
+
+        futures.forEach(f -> {
+            try {
+                f.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                throw new RuntimeException("Exception: " + ex.getClass() + " " + ex.getMessage());
+            }
+        });
 
         return result;
     }
+
 
     public static float[][] multiplyEntries_singleThread(float[][] matrix1, float[][] matrix2) {
         assert (matrix1.length == matrix2.length);
@@ -174,7 +242,7 @@ public class MatrixManipulator {
 
         List<Future<?>> futures = IntStream.range(0, NUM_OF_PROCESSORS)
                 .mapToObj(p -> {
-                    Future<?> future = executor2.submit(() -> multiplyEntries(matrix1, matrix2, result,
+                    Future<?> future = executor.submit(() -> multiplyEntries(matrix1, matrix2, result,
                             p * (matrix1.length / NUM_OF_PROCESSORS),
                             p == NUM_OF_PROCESSORS ?
                                     matrix1.length :
