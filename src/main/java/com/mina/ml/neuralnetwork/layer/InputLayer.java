@@ -17,9 +17,16 @@ public class InputLayer extends Layer {
     }
 
     @Override
-    public float[][] forwardPropagation() {
+    public double[][] forwardPropagation() {
         // add column of ones in the very beginning of the matrix
-        float[][] outMatrix = MatrixManipulator.addColumnOfOnes(input);
+
+//        MatrixManipulator.debugMatrix("before add onces: ", input);
+
+
+        double[][] outMatrix = MatrixManipulator.addColumnOfOnes(input);
+
+//        MatrixManipulator.debugMatrix("after add onces: ", outMatrix);
+//        System.exit(0);
 //        MatrixManipulator.debugMatrix(layerName + " input [*After Adding Column of Ones*]:", outMatrix);
 
         return nextLayer.input(outMatrix)
@@ -27,7 +34,7 @@ public class InputLayer extends Layer {
     }
 
     @Override
-    public void backPropagation(float[][] costOutputPrime) {
+    public void backPropagation(double[][] costOutputPrime) {
         /* UnApplicable */
     }
 

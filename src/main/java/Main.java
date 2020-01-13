@@ -34,8 +34,8 @@ public class Main {
         neuralNetworkProperties.put(Constants.MAX_EPOCH, 1000000);
 
 
-        float[][] x = getInputData();
-        float[][] y = getLabels();
+        double[][] x = getInputData();
+        double[][] y = getLabels();
 
         Configuration configuration = new Configuration(neuralNetworkProperties);
         try {
@@ -50,13 +50,13 @@ public class Main {
 
     }
 
-    private static float[][] getInputData() {
-        float[][] x = {{0.1f, 0.3f}, {0.4f, 0.9f}, {0.1f, 0.2f}};
+    private static double[][] getInputData() {
+        double[][] x = {{0.1d, 0.3d}, {0.4d, 0.9d}, {0.1d, 0.2d}};
         return x;
     }
 
-    private static float[][] getLabels() {
-        float[][] y = {{0.03f, 0.02f, 0.01f}, {0.05f, 0.02f, 0.01f}, {0.07f, 0.02f, 0.01f}};
+    private static double[][] getLabels() {
+        double[][] y = {{0.03d, 0.02d, 0.01d}, {0.05d, 0.02d, 0.01d}, {0.07d, 0.02d, 0.01d}};
 //        float[][] y = {{0.03f}, {0.05f}, {0.07f}};
         return y;
     }

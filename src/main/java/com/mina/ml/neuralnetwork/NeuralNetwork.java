@@ -31,8 +31,17 @@ public class NeuralNetwork {
     private Layer inputLayer;
     private Layer outputLayer;
 
-    private List<float[]> inputData;
-    private List<float[]> outputLabels;
+    private List<double[]> x_train;
+    private List<double[]> y_train;
+
+    private List<double[]> x_test;
+    private List<double[]> y_test;
+
+
+//    private List<double[]> inputData;
+//    private List<double[]> outputLabels;
+
+    private double validation_split = 0.15d;
 
     private LossFunction lossFunction;
     private int batchSize;
@@ -98,7 +107,7 @@ public class NeuralNetwork {
         logger.debug("Set Max Epoch = {}", maxEpoch);
     }
 
-    public void fetchDataSet(float[][] inputData, float[][] labels) {
+    public void fetchDataSet(double[][] inputData, double[][] labels) {
 
         // do some validation
         if (inputData.length != labels.length) {
@@ -109,13 +118,13 @@ public class NeuralNetwork {
         logger.debug("start fetching data, Total examples = {}", inputData.length);
 
         // convert the data set to Array-list
-        List<float[]> inputs = twoDArrayToList(inputData);
-        List<float[]> outputs = twoDArrayToList(labels);
+        List<double[]> inputs = twoDArrayToList(inputData);
+        List<double[]> outputs = twoDArrayToList(labels);
 
         fetchDataSet(inputs, outputs);
     }
 
-    public void fetchDataSet(List<float[]> inputData, List<float[]> outputLabels) {
+    public void fetchDataSet(List<double[]> inputData, List<double[]> outputLabels) {
 
         // do some validation
         if (inputData.size() != outputLabels.size()) {
@@ -125,45 +134,57 @@ public class NeuralNetwork {
 
         logger.debug("Start fetching data, Total examples = {}", inputData.size());
 
-        this.inputData = inputData;
-        this.outputLabels = outputLabels;
+//        this.inputData = inputData;
+//        this.outputLabels = outputLabels;
+
+        int validationStartIndex = (int) (inputData.size() * (1d - validation_split));
+
+        x_train = inputData.subList(0, validationStartIndex);
+        y_train = outputLabels.subList(0, validationStartIndex);
+
+        x_test = inputData.subList(validationStartIndex, inputData.size());
+        y_test = outputLabels.subList(validationStartIndex, outputLabels.size());
+
+//        System.out.println("Validation x_train size = " + x_train.size());
+//        System.out.println("Validation y_train size = " + y_train.size());
+//
+//        System.out.println("Validation x_test size = " + x_test.size());
+//        System.out.println("Validation y_test size = " + y_test.size());
     }
 
     public void train() {
         // make sure that you received the data
-        if (Objects.isNull(inputData) || Objects.isNull(outputLabels)) {
+        if (Objects.isNull(x_train) || Objects.isNull(y_train)) {
             logger.error("There is No Data set fetched for training, You should fetch the data before start training.");
             throw new RuntimeException("There is No DataSet fetched!");
         }
 
         logger.debug("Partition the data into batches of size = {}", batchSize);
-        List<List<float[]>> inputBatches = Lists.partition(inputData, batchSize);
-        List<List<float[]>> outputBatches = Lists.partition(outputLabels, batchSize);
+        List<List<double[]>> inputBatches = Lists.partition(x_train, batchSize);
+        List<List<double[]>> outputBatches = Lists.partition(y_train, batchSize);
 
         int epochNumber = 1;
         double meanErrorPerEpoch;
         List<Double> errorsPerEpoch = new ArrayList<>();
-        Stopwatch stopwatch = Stopwatch.createStarted();
+        Stopwatch stopwatch;
         do {
 //            logger.info("Number of batches = {}", inputBatches.size());
 //            logger.debug("Number of batches = {}", inputBatches.size());
 //            Stopwatch sw = Stopwatch.createStarted();
 
 
-
             stopwatch = Stopwatch.createStarted();
-            logger.info("Epoch " + epochNumber + "/" + maxEpoch);
+            String log = "Epoch " + epochNumber + "/" + maxEpoch;
+            System.out.println(log);
+//            logger.info(log);
             for (int batch = 0; batch < inputBatches.size(); batch++) {
 //logger.info("HERE 1");
 //                logger.debug("Prepare Input batch Id = [{}]", batch);
-                logger.info("Prepare Input batch Id = [{}]", batch);
+//                logger.info("Prepare Input batch Id = [{}]", batch);
 
 
-
-
-
-                List<float[]> inputBatch = inputBatches.get(batch);
-                float[][] in = new float[inputBatch.size()][];
+                List<double[]> inputBatch = inputBatches.get(batch);
+                double[][] in = new double[inputBatch.size()][];
                 in = inputBatch.toArray(in);
 
 //sw.stop();
@@ -171,15 +192,15 @@ public class NeuralNetwork {
 //logger.info("HERE 2 - timeElapsed = " + t);
 //sw.reset();
 //                logger.debug("Prepare Output batch Id = [{}]", batch);
-                List<float[]> outputBatch = outputBatches.get(batch);
-                float[][] labels = new float[outputBatch.size()][];
+                List<double[]> outputBatch = outputBatches.get(batch);
+                double[][] labels = new double[outputBatch.size()][];
                 labels = outputBatch.toArray(labels);
 //sw.stop();
 //t = sw.elapsed(TimeUnit.MICROSECONDS);
 //logger.info("HERE 3 - timeElapsed = " + t);
 //sw.reset();
 //                logger.debug("Start Forward propagation for batch Id = [{}]", batch);
-                float[][] output = inputLayer.input(in).forwardPropagation();
+                double[][] output = inputLayer.input(in).forwardPropagation();
 //                logger.debug("Finish Forward propagation for batch Id = [{}]", batch);
 //logger.info("HERE 4");
 
@@ -206,7 +227,7 @@ public class NeuralNetwork {
 //logger.info("HERE 6");
                 // back propagation
 //                logger.debug("Start Back propagation for batch Id = [{}]", batch);
-                float[][] costOutputPrime = lossFunction.errorOutputPrime(labels, output,
+                double[][] costOutputPrime = lossFunction.errorOutputPrime(labels, output,
                         outputLayer.getActivationFunction());
 //logger.info("HERE 7");
 
@@ -241,32 +262,52 @@ public class NeuralNetwork {
 //System.exit(0);
             }
 
+
             meanErrorPerEpoch = errorsPerEpoch.stream()
                     .collect(Collectors.summarizingDouble(Double::doubleValue))
                     .getAverage();
+
 
 //            String report = String.format("Epoch [ %7d ] Mean Error = %.9f", epochNumber, meanErrorPerEpoch);
 //            System.out.println(report);
 //            logger.debug(report);
 
+//            System.out.println("before: " + errorsPerEpoch.size());
             errorsPerEpoch.clear();
+//            System.out.println("after: " + errorsPerEpoch.size());
 //            logger.debug("errorsPerEpoch List cleared, size = {}", errorsPerEpoch.size());
+
+
+            /* validation */
+
+            double[][] x_test_in = new double[x_test.size()][];
+            double[][] y_test_in = new double[y_test.size()][];
+            double[][] validation_output = inputLayer.input(x_test.toArray(x_test_in))
+                    .forwardPropagation();
+            double meanError = lossFunction.reducedMeanError(validation_output, y_test.toArray(y_test_in));
+
+            //-----------------------------------------
 
             stopwatch.stop();
             long timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
 
 
-            logger.info(" - " + timeElapsed + " + s - loss: 0.3798 - acc: 0.8637 - val_loss: 0.4116 - val_acc: 0.8400");
+//            logger.info(" - " + timeElapsed + "s - loss: 0.3798 - acc: 0.8637 - val_loss: 0.4116 - val_acc: 0.8400");
+//            String.format("Epoch [ %7d ] Mean Error = %.9f", epochNumber, meanErrorPerEpoch)
+            log = String.format(" - %ds - loss: %.4f - acc: 0.8637 - val_loss: %.4f - val_acc: 0.8400",
+                    timeElapsed, meanErrorPerEpoch, meanError);
+            System.out.println(log);
+//            logger.info(log);
 
             epochNumber++;
 
-        } while (epochNumber <= maxEpoch && Math.abs(meanErrorPerEpoch - EPSILON) > EPSILON);
+        } while (epochNumber <= maxEpoch);// && Math.abs(meanErrorPerEpoch - EPSILON) > EPSILON);
 
     }
 
-    private List<float[]> twoDArrayToList(float[][] twoDArray) {
-        List<float[]> list = new ArrayList<>();
-        for (float[] array : twoDArray) {
+    private List<double[]> twoDArrayToList(double[][] twoDArray) {
+        List<double[]> list = new ArrayList<>();
+        for (double[] array : twoDArray) {
             list.add(array);
         }
         return list;

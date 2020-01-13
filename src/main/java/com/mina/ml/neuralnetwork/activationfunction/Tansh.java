@@ -11,15 +11,15 @@ public class Tansh extends ActivationFunction {
     private final static Logger logger = LoggerFactory.getLogger(Tansh.class);
 
     @Override
-    public float activate(float value) {
+    public double activate(double value) {
         // (e^x - e^-x) / (e^x + e^-x)
-        return (float) ((Math.exp((double) value) - Math.exp((double) -value)) /
+        return ((Math.exp((double) value) - Math.exp((double) -value)) /
                 (Math.exp((double) value) + Math.exp((double) -value)));
     }
 
     @Override
-    public float activatePrime(float value) {
-        return 1f - (float) Math.pow(activate(value), 2);
+    public double activatePrime(double value) {
+        return 1d - (float) Math.pow(activate(value), 2);
     }
 
 }

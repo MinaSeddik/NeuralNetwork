@@ -16,7 +16,7 @@ public class CrossEntropyLoss extends LossFunction {
     private final static Logger logger = LoggerFactory.getLogger(CrossEntropyLoss.class);
 
     @Override
-    public float[][] errorCost(float[][] labels, float[][] output) {
+    public double[][] errorCost(double[][] labels, double[][] output) {
 //        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCost received labels: ", labels);
 //        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCost received output: ", output);
 
@@ -24,18 +24,17 @@ public class CrossEntropyLoss extends LossFunction {
 //        MatrixManipulator.printMatrix("CrossEntropyLoss calculates errorCost received output: ", output);
 
         // make sure that the both matrices have the same dimension
-        assert (labels != null);
-        assert (output != null);
-        assert (labels.length == output.length);
-        assert (labels[0].length == output[0].length);
+//        assert (labels != null);
+//        assert (output != null);
+//        assert (labels.length == output.length);
+//        assert (labels[0].length == output[0].length);
 
-        float[][] costs = new float[labels.length][1];
-        MatrixManipulator.initializeMatrix(costs, 0f);
+        double[][] costs = new double[labels.length][1];
 
-        float y = 0f;
+        double y = 0d;
         for (int i = 0; i < labels.length; i++) {
             for (int j = 0; j < labels[0].length; j++) {
-                y = output[i][j] == 0f ? Float.MIN_VALUE : output[i][j];
+                y = output[i][j] == 0d ? Double.MIN_VALUE : output[i][j];
 //                costs[i][0] += (labels[i][j] * Math.log(output[i][j])) + ((1f - labels[i][j]) * Math.log(1f - output[i][j]));
                 costs[i][0] += (labels[i][j] * Math.log(y));// + ((1f - labels[i][j]) * Math.log(1f - y));
 
@@ -62,7 +61,7 @@ public class CrossEntropyLoss extends LossFunction {
     }
 
     @Override
-    public float[][] errorOutputPrime(float[][] labels, float[][] output, ActivationFunction activationFunction) {
+    public double[][] errorOutputPrime(double[][] labels, double[][] output, ActivationFunction activationFunction) {
 //        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCostPrime received labels: ", labels);
 //        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCostPrime received output: ", output);
 
@@ -72,8 +71,8 @@ public class CrossEntropyLoss extends LossFunction {
         assert (labels.length == output.length);
         assert (labels[0].length == output[0].length);
 
-        float[][] outputPrime = new float[output.length][output[0].length];
-        MatrixManipulator.initializeMatrix(outputPrime, 0f);
+        double[][] outputPrime = new double[output.length][output[0].length];
+        MatrixManipulator.initializeMatrix(outputPrime, 0d);
 
         for (int i = 0; i < outputPrime.length; i++) {
             for (int j = 0; j < outputPrime[0].length; j++) {

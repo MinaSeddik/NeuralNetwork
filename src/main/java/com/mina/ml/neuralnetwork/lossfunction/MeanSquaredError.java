@@ -13,7 +13,7 @@ public class MeanSquaredError extends LossFunction {
     private final static Logger logger = LoggerFactory.getLogger(MeanSquaredError.class);
 
     @Override
-    public float[][] errorCost(float[][] labels, float[][] output) {
+    public double[][] errorCost(double[][] labels, double[][] output) {
 //        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCost received labels: ", labels);
 //        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCost received output: ", output);
 //
@@ -26,8 +26,8 @@ public class MeanSquaredError extends LossFunction {
         assert (labels.length == output.length);
         assert (labels[0].length == output[0].length);
 
-        float[][] costs = new float[labels.length][1];
-        MatrixManipulator.initializeMatrix(costs, 0f);
+        double[][] costs = new double[labels.length][1];
+        MatrixManipulator.initializeMatrix(costs, 0d);
 
         for (int i = 0; i < labels.length; i++) {
             for (int j = 0; j < labels[0].length; j++) {
@@ -41,7 +41,7 @@ public class MeanSquaredError extends LossFunction {
     }
 
     @Override
-    public float[][] errorOutputPrime(float[][] labels, float[][] output, ActivationFunction activationFunction) {
+    public double[][] errorOutputPrime(double[][] labels, double[][] output, ActivationFunction activationFunction) {
 //        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCostPrime received labels: ", labels);
 //        MatrixManipulator.debugMatrix("MeanSquaredError calculates errorCostPrime received output: ", output);
 
@@ -51,8 +51,8 @@ public class MeanSquaredError extends LossFunction {
         assert (labels.length == output.length);
         assert (labels[0].length == output[0].length);
 
-        float[][] outputPrime = new float[output.length][output[0].length];
-        MatrixManipulator.initializeMatrix(outputPrime, 0f);
+        double[][] outputPrime = new double[output.length][output[0].length];
+        MatrixManipulator.initializeMatrix(outputPrime, 0d);
 
         for (int i = 0; i < outputPrime.length; i++) {
             for (int j = 0; j < outputPrime[0].length; j++) {

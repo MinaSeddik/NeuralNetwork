@@ -17,8 +17,8 @@ public class MatrixManipulatorTest {
 
     @Test
     public void multiply() {
-        float[][] matrix1 = new float[ROWS1][COLS1];
-        float[][] matrix2 = new float[ROWS2][COLS2];
+        double[][] matrix1 = new double[ROWS1][COLS1];
+        double[][] matrix2 = new double[ROWS2][COLS2];
 
 
         System.out.println("Generating Randoms for M1");
@@ -29,14 +29,14 @@ public class MatrixManipulatorTest {
 
         System.out.println("Mul Single Thread");
         Stopwatch stopwatch = Stopwatch.createStarted();
-        float[][] result1 = MatrixManipulator.multiply_singleThread(matrix1, matrix2);
+        double[][] result1 = MatrixManipulator.multiply_singleThread(matrix1, matrix2);
         stopwatch.stop();
         long timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
         System.out.println("Elapsed time = " + timeElapsed);
 
         System.out.println("Mul Multi-Thread");
         stopwatch = Stopwatch.createStarted();
-        float[][] result2 = MatrixManipulator.multiply(matrix1, matrix2);
+        double[][] result2 = MatrixManipulator.multiply(matrix1, matrix2);
         stopwatch.stop();
         timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
         System.out.println("Elapsed time = " + timeElapsed);
@@ -46,8 +46,8 @@ public class MatrixManipulatorTest {
 
     @Test
     public void multiplyEntries() {
-        float[][] matrix1 = new float[ROWS1][COLS1];
-        float[][] matrix2 = new float[ROWS1][COLS1];
+        double[][] matrix1 = new double[ROWS1][COLS1];
+        double[][] matrix2 = new double[ROWS1][COLS1];
 
         System.out.println("Generating Randoms for M1");
         generateRandom(matrix1);
@@ -57,14 +57,14 @@ public class MatrixManipulatorTest {
 
         System.out.println("Mul-Entries Single Thread");
         Stopwatch stopwatch = Stopwatch.createStarted();
-        float[][] result1 = MatrixManipulator.multiplyEntries_singleThread(matrix1, matrix2);
+        double[][] result1 = MatrixManipulator.multiplyEntries_singleThread(matrix1, matrix2);
         stopwatch.stop();
         long timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
         System.out.println("Elapsed time = " + timeElapsed);
 
         System.out.println("Mul-Entries Multi-Thread");
         stopwatch = Stopwatch.createStarted();
-        float[][] result2 = MatrixManipulator.multiplyEntries(matrix1, matrix2);
+        double[][] result2 = MatrixManipulator.multiplyEntries(matrix1, matrix2);
         stopwatch.stop();
         timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
         System.out.println("Elapsed time = " + timeElapsed);
@@ -72,7 +72,7 @@ public class MatrixManipulatorTest {
         assertMatrices(result1, result2);
     }
 
-    private void assertMatrices(float[][] result1, float[][] result2) {
+    private void assertMatrices(double[][] result1, double[][] result2) {
 
         for (int i = 0; i < result1.length; i++) {
             for (int j = 0; j < result1[0].length; j++) {
@@ -81,11 +81,11 @@ public class MatrixManipulatorTest {
         }
     }
 
-    private void generateRandom(float[][] matrix) {
+    private void generateRandom(double[][] matrix) {
         Random r = new Random();
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
-                matrix[i][j] = r.nextFloat();
+                matrix[i][j] = r.nextDouble();
             }
         }
     }

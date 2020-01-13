@@ -12,8 +12,8 @@ public abstract class LossFunction {
 
     private final static Logger logger = LoggerFactory.getLogger(LossFunction.class);
 
-    public double reducedMeanError(float[][] labels, float[][] output) {
-        float[][] costs = errorCost(labels, output);
+    public double reducedMeanError(double[][] labels, double[][] output) {
+        double[][] costs = errorCost(labels, output);
 
 //        MatrixManipulator.debugMatrix("Reduced Mean Error Matrix:", costs);
 //        MatrixManipulator.printMatrix("Reduced Mean Error Matrix:", costs);
@@ -30,8 +30,8 @@ public abstract class LossFunction {
         return meanError / costs.length;
     }
 
-    protected abstract float[][] errorCost(float[][] labels, float[][] output);
+    protected abstract double[][] errorCost(double[][] labels, double[][] output);
 
-    public abstract float[][] errorOutputPrime(float[][] labels, float[][] output, ActivationFunction activationFunction);
+    public abstract double[][] errorOutputPrime(double[][] labels, double[][] output, ActivationFunction activationFunction);
 
 }

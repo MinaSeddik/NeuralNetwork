@@ -11,13 +11,13 @@ public class Sigmoid extends ActivationFunction {
     private final static Logger logger = LoggerFactory.getLogger(Sigmoid.class);
 
     @Override
-    public float activate(float value) {
+    public double activate(double value) {
         //f(x)=1/(1+e^-x)
-        return 1f / (1f + (float) Math.exp(-value));
+        return 1d / (1d + Math.exp(-value));
     }
 
     @Override
-    public float activatePrime(float value) {
+    public double activatePrime(double value) {
         return activate(value) * (1 - activate(value));
     }
 

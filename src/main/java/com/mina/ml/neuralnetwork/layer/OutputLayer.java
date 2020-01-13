@@ -17,7 +17,7 @@ public class OutputLayer extends Layer {
     }
 
     @Override
-    public float[][] forwardPropagation() {
+    public double[][] forwardPropagation() {
 //        MatrixManipulator.debugMatrix(layerName + " input:", input);
 //        MatrixManipulator.debugMatrix(layerName + " weight:", weight);
 
@@ -31,7 +31,7 @@ public class OutputLayer extends Layer {
     }
 
     @Override
-    public void backPropagation(float[][] costOutputPrime) {
+    public void backPropagation(double[][] costOutputPrime) {
         logger.debug("{} BackPropagation calculateDeltaWeight ...", layerName);
         calculateDeltaWeight(costOutputPrime);
 

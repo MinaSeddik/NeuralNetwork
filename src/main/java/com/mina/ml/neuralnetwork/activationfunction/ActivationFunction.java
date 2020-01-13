@@ -22,7 +22,7 @@ public abstract class ActivationFunction {
 
     private static ExecutorService executor = Executors.newFixedThreadPool(NUM_OF_PROCESSORS);
 
-    public void activate(float[][] matrix, float[][] result, int startIndex, int endIndex) {
+    public void activate(double[][] matrix, double[][] result, int startIndex, int endIndex) {
 
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
@@ -31,31 +31,35 @@ public abstract class ActivationFunction {
         }
     }
 
-    public float[][] activate(float[][] matrix) {
-        float[][] result = new float[matrix.length][matrix[0].length];
+    public double[][] activate(double[][] matrix) {
+        double[][] result = new double[matrix.length][matrix[0].length];
 
-        List<Future<?>> futures = IntStream.range(0, NUM_OF_PROCESSORS)
-                .mapToObj(p -> {
-                    Future<?> future = executor.submit(() -> activate(matrix, result,
-                            p * (matrix.length / NUM_OF_PROCESSORS),
-                            p == NUM_OF_PROCESSORS ?
-                                    matrix.length :
-                                    p * (matrix.length / NUM_OF_PROCESSORS) + (matrix.length / NUM_OF_PROCESSORS)));
-                    return future;
-                }).collect(Collectors.toList());
+        if (matrix.length <= NUM_OF_PROCESSORS) {
+            activate(matrix, result, 0, matrix.length);
+        } else {
+            List<Future<?>> futures = IntStream.range(0, NUM_OF_PROCESSORS)
+                    .mapToObj(p -> {
+                        Future<?> future = executor.submit(() -> activate(matrix, result,
+                                p * (matrix.length / NUM_OF_PROCESSORS),
+                                p == NUM_OF_PROCESSORS ?
+                                        matrix.length :
+                                        p * (matrix.length / NUM_OF_PROCESSORS) + (matrix.length / NUM_OF_PROCESSORS)));
+                        return future;
+                    }).collect(Collectors.toList());
 
-        futures.forEach(f -> {
-            try {
-                f.get();
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new RuntimeException("Exception: " + ex.getClass() + " " + ex.getMessage());
-            }
-        });
+            futures.forEach(f -> {
+                try {
+                    f.get();
+                } catch (InterruptedException | ExecutionException ex) {
+                    throw new RuntimeException("Exception: " + ex.getClass() + " " + ex.getMessage());
+                }
+            });
+        }
 
         return result;
     }
 
-    public void activatePrime(float[][] matrix, float[][] result, int startIndex, int endIndex) {
+    public void activatePrime(double[][] matrix, double[][] result, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
                 result[i][j] = activatePrime(matrix[i][j]);
@@ -64,31 +68,35 @@ public abstract class ActivationFunction {
     }
 
 
-    public float[][] activatePrime(float[][] matrix) {
-        float[][] result = new float[matrix.length][matrix[0].length];
+    public double[][] activatePrime(double[][] matrix) {
+        double[][] result = new double[matrix.length][matrix[0].length];
 
-        List<Future<?>> futures = IntStream.range(0, NUM_OF_PROCESSORS)
-                .mapToObj(p -> {
-                    Future<?> future = executor.submit(() -> activatePrime(matrix, result,
-                            p * (matrix.length / NUM_OF_PROCESSORS),
-                            p == NUM_OF_PROCESSORS ?
-                                    matrix.length :
-                                    p * (matrix.length / NUM_OF_PROCESSORS) + (matrix.length / NUM_OF_PROCESSORS)));
-                    return future;
-                }).collect(Collectors.toList());
+        if (matrix.length <= NUM_OF_PROCESSORS) {
+            activatePrime(matrix, result, 0, matrix.length);
+        } else {
+            List<Future<?>> futures = IntStream.range(0, NUM_OF_PROCESSORS)
+                    .mapToObj(p -> {
+                        Future<?> future = executor.submit(() -> activatePrime(matrix, result,
+                                p * (matrix.length / NUM_OF_PROCESSORS),
+                                p == NUM_OF_PROCESSORS ?
+                                        matrix.length :
+                                        p * (matrix.length / NUM_OF_PROCESSORS) + (matrix.length / NUM_OF_PROCESSORS)));
+                        return future;
+                    }).collect(Collectors.toList());
 
-        futures.forEach(f -> {
-            try {
-                f.get();
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new RuntimeException("Exception: " + ex.getClass() + " " + ex.getMessage());
-            }
-        });
+            futures.forEach(f -> {
+                try {
+                    f.get();
+                } catch (InterruptedException | ExecutionException ex) {
+                    throw new RuntimeException("Exception: " + ex.getClass() + " " + ex.getMessage());
+                }
+            });
+        }
 
         return result;
     }
 
-    public abstract float activate(float value);
+    public abstract double activate(double value);
 
-    public abstract float activatePrime(float value);
+    public abstract double activatePrime(double value);
 }

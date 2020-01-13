@@ -11,12 +11,12 @@ public class Relu extends ActivationFunction {
     private final static Logger logger = LoggerFactory.getLogger(Relu.class);
 
     @Override
-    public float activate(float value) {
+    public double activate(double value) {
         return Math.max(0f, value);
     }
 
     @Override
-    public float activatePrime(float value) {
+    public double activatePrime(double value) {
         //https://stats.stackexchange.com/questions/333394/what-is-the-derivative-of-the-relu-activation-function
         assert (value != 0);
 

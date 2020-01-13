@@ -20,8 +20,8 @@ public class SineTraining {
 
         // generate 1000000 number
         List<Float> list = generateRandomNumbers();
-        float[][] inputDataSet = new float[DATA_SET_SIZE][5];
-        float[] output = new float[DATA_SET_SIZE];
+        double[][] inputDataSet = new double[DATA_SET_SIZE][5];
+        double[] output = new double[DATA_SET_SIZE];
 
         for (int i = 0; i < DATA_SET_SIZE; i++) {
             inputDataSet[i][0] = list.get(i);
@@ -59,14 +59,14 @@ public class SineTraining {
 
         neuralNetworkProperties.put(Constants.LOSS_FUNCTION, "MeanSquaredError");
 
-        neuralNetworkProperties.put(Constants.BATCH_SIZE, 256);
-        neuralNetworkProperties.put(Constants.MAX_EPOCH, 1000000);
+        neuralNetworkProperties.put(Constants.BATCH_SIZE, 5);
+        neuralNetworkProperties.put(Constants.MAX_EPOCH, 100);
 
         Configuration configuration = new Configuration(neuralNetworkProperties);
         try {
             NeuralNetwork neuralNetwork = new NeuralNetwork(configuration);
 
-            float[][] labels = MatrixManipulator.vectorToMatrix(output);
+            double[][] labels = MatrixManipulator.vectorToMatrix(output);
             labels = MatrixManipulator.transposeMatrix(labels);
 
             neuralNetwork.fetchDataSet(inputDataSet, labels);

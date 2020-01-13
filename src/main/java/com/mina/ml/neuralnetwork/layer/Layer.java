@@ -23,12 +23,12 @@ public abstract class Layer {
     protected Layer previousLayer;
     protected Layer nextLayer;
 
-    protected float[][] input;
-    protected float[][] A;
-    protected float[][] Z;
+    protected double[][] input;
+    protected double[][] A;
+    protected double[][] Z;
 
-    protected float[][] weight;
-    protected float[][] deltaWeight;
+    protected double[][] weight;
+    protected double[][] deltaWeight;
 
     protected ActivationFunction activationFunction;
     protected double learningRate;
@@ -42,10 +42,10 @@ public abstract class Layer {
         this.learningRate = learningRate;
 
         // init the weight matrix
-        weight = new float[numOfInputs][numOfOutputs];
+        weight = new double[numOfInputs][numOfOutputs];
         initializeWeights(weight);
 
-        deltaWeight = new float[numOfInputs][numOfOutputs];
+        deltaWeight = new double[numOfInputs][numOfOutputs];
 
         ActivationFunctionFactory activationFunctionFactory = new ActivationFunctionFactory();
         try {
@@ -61,20 +61,21 @@ public abstract class Layer {
         this.numOfInputs = numOfInputs;
     }
 
-    private void initializeWeights(float[][] weight) {
-        float rangeMin = -1.0f;
-        float rangeMax = 1.0f;
+    private void initializeWeights(double[][] weight) {
+        double rangeMin = -1.0d;
+        double rangeMax = 1.0d;
         Random r = new Random();
+//        r.setSeed(0);
 
         logger.debug(String.format("Initializing Weights between [%.2f] and [%.2f]", rangeMin, rangeMax));
         for (int i = 0; i < weight.length; i++) {
             for (int j = 0; j < weight[0].length; j++) {
-                weight[i][j] = rangeMin + (rangeMax - rangeMin) * r.nextFloat();
+                weight[i][j] = rangeMin + (rangeMax - rangeMin) * r.nextDouble();
             }
         }
     }
 
-    protected void calculateDeltaWeight(float[][] costOutputPrime) {
+    protected void calculateDeltaWeight(double[][] costOutputPrime) {
         // make sure that both of them has the same row ( # of examples)
         assert (costOutputPrime.length == input.length);
 
@@ -82,17 +83,17 @@ public abstract class Layer {
         assert (deltaWeight[0].length == costOutputPrime.length);
 
         // reset delta weights
-        MatrixManipulator.initializeMatrix(deltaWeight, 0f);
+        MatrixManipulator.initializeMatrix(deltaWeight, 0d);
 
         for (int i = 0; i < input.length; i++) {
 //            logger.info("HERE 7.3.1");
-            float[][] in = MatrixManipulator.transposeMatrix(MatrixManipulator.vectorToMatrix(input[i]));
-            float[][] out = MatrixManipulator.vectorToMatrix(costOutputPrime[i]);
+            double[][] in = MatrixManipulator.transposeMatrix(MatrixManipulator.vectorToMatrix(input[i]));
+            double[][] out = MatrixManipulator.vectorToMatrix(costOutputPrime[i]);
 //            logger.info("HERE 7.3.2");
 //            MatrixManipulator.debugMatrix(layerName + " in: ", in);
 //            MatrixManipulator.debugMatrix(layerName + " out: ", out);
 //            logger.info("HERE 7.3.3");
-            float[][] dWeights = MatrixManipulator.multiply(in, out);
+            double[][] dWeights = MatrixManipulator.multiply(in, out);
 //            MatrixManipulator.debugMatrix(layerName + " dWeights: ", dWeights);
 //            logger.info("HERE 7.3.4");
             accumulateDeltaWeights(dWeights);
@@ -108,13 +109,13 @@ public abstract class Layer {
 //        MatrixManipulator.debugMatrix(layerName + " deltaWeight: ", deltaWeight);
     }
 
-    protected void prepareErrorCostThenBackPropagate(float[][] costOutputPrime) {
-        float[][] costPrime = null;
+    protected void prepareErrorCostThenBackPropagate(double[][] costOutputPrime) {
+        double[][] costPrime = null;
 
         if (previousLayer instanceof HiddenLayer) {
 
             // prepare the costPrime for the previous layer for cost error back propagation
-            float[][] weightTranspose = MatrixManipulator.transposeMatrix(weight);
+            double[][] weightTranspose = MatrixManipulator.transposeMatrix(weight);
             costPrime = MatrixManipulator.multiply(costOutputPrime, weightTranspose);
 //            MatrixManipulator.debugMatrix(layerName + " costPrime: ", costPrime);
 
@@ -127,18 +128,22 @@ public abstract class Layer {
         previousLayer.backPropagation(costPrime);
     }
 
-    private void accumulateDeltaWeights(float[][] dWeights) {
+    private void accumulateDeltaWeights(double[][] dWeights) {
         assert (deltaWeight.length == dWeights.length);
         assert (deltaWeight[0].length == dWeights[0].length);
+
+//        MatrixManipulator.debugMatrix("accumulateDeltaWeights::dWeights", dWeights);
 
         for (int i = 0; i < deltaWeight.length; i++) {
             for (int j = 0; j < deltaWeight[0].length; j++) {
                 deltaWeight[i][j] += dWeights[i][j];
             }
         }
+
+//        MatrixManipulator.debugMatrix("accumulateDeltaWeights", deltaWeight);
     }
 
-    public Layer input(float[][] input) {
+    public Layer input(double[][] input) {
         this.input = input;
 //        MatrixManipulator.debugMatrix(layerName + " received input: ", input);
 
@@ -153,15 +158,25 @@ public abstract class Layer {
         nextLayer = layer;
     }
 
-    public abstract float[][] forwardPropagation();
+    public abstract double[][] forwardPropagation();
 
-    public abstract void backPropagation(float[][] costOutputPrime);
+    public abstract void backPropagation(double[][] costOutputPrime);
 
     public abstract int getNumberOfOutputs();
 
     public abstract ActivationFunction getActivationFunction();
 
     public void updateWeights() {
+
+//***********************************************************
+//        if ((this instanceof HiddenLayer)) {
+//            MatrixManipulator.debugMatrix("Hidden Layer Weight [Before]", weight);
+//        }
+//
+//        if ((this instanceof OutputLayer)) {
+//            MatrixManipulator.debugMatrix("Output Layer Weight [Before]", weight);
+//        }
+//***********************************************************
 
         // not applicable for Input Layer
         if (!(this instanceof InputLayer)) {
@@ -175,7 +190,18 @@ public abstract class Layer {
                 }
             }
 
+//            MatrixManipulator.debugMatrix("deltas", deltaWeight);
         }
+
+//***********************************************************
+//        if ((this instanceof HiddenLayer)) {
+//            MatrixManipulator.debugMatrix("Hidden Layer Weight [After]", weight);
+//        }
+//
+//        if ((this instanceof OutputLayer)) {
+//            MatrixManipulator.debugMatrix("Output Layer Weight [After]", weight);
+//        }
+//***********************************************************
 
         if (null != nextLayer) {
             logger.debug("Update weights for the next Layer");

@@ -61,8 +61,8 @@ public class MNistTraining {
         List<int[][]> _images = MNistReader.getImages(imagesTrainingFile);
         int[] _labels = MNistReader.getLabels(labelsTrainingFile);
 
-        List<float[]> images = _images.stream().map(matrix -> convert2DataArray(matrix)).collect(Collectors.toList());
-        List<float[]> labels = Arrays.stream(_labels).boxed().map(l -> convert2HotEncodedArray(l)).collect(Collectors.toList());
+        List<double[]> images = _images.stream().map(matrix -> convert2DataArray(matrix)).collect(Collectors.toList());
+        List<double[]> labels = Arrays.stream(_labels).boxed().map(l -> convert2HotEncodedArray(l)).collect(Collectors.toList());
 
         Properties neuralNetworkProperties = new Properties();
 
@@ -72,13 +72,13 @@ public class MNistTraining {
         neuralNetworkProperties.put(Constants.OUTPUT_ACTIVATION_FUNCTION, "softmax");
 //        neuralNetworkProperties.put(Constants.OUTPUT_ACTIVATION_FUNCTION, "relu");
 
-        neuralNetworkProperties.put(Constants.NUMBER_OF_HIDDEN_LAYERS, 1);
+        neuralNetworkProperties.put(Constants.NUMBER_OF_HIDDEN_LAYERS, 2);
 
-        neuralNetworkProperties.put(Constants.NUMBER_OF_HIDDEN_LAYER_NODES.replace("{HIDDEN_LAYER}", "1"), 800);
-        neuralNetworkProperties.put(Constants.HIDDEN_ACTIVATION_FUNCTION.replace("{HIDDEN_LAYER}", "1"), "tanh");
+        neuralNetworkProperties.put(Constants.NUMBER_OF_HIDDEN_LAYER_NODES.replace("{HIDDEN_LAYER}", "1"), 64);
+        neuralNetworkProperties.put(Constants.HIDDEN_ACTIVATION_FUNCTION.replace("{HIDDEN_LAYER}", "1"), "relu");
 
-//        neuralNetworkProperties.put(Constants.NUMBER_OF_HIDDEN_LAYER_NODES.replace("{HIDDEN_LAYER}", "2"), 800);
-//        neuralNetworkProperties.put(Constants.HIDDEN_ACTIVATION_FUNCTION.replace("{HIDDEN_LAYER}", "2"), "relu");
+        neuralNetworkProperties.put(Constants.NUMBER_OF_HIDDEN_LAYER_NODES.replace("{HIDDEN_LAYER}", "2"), 64);
+        neuralNetworkProperties.put(Constants.HIDDEN_ACTIVATION_FUNCTION.replace("{HIDDEN_LAYER}", "2"), "relu");
 
 
         neuralNetworkProperties.put(Constants.LEARNING_RATE, 0.001);
@@ -102,21 +102,21 @@ public class MNistTraining {
 
     }
 
-    private static float[] convert2DataArray(int[][] matrix) {
-        float[] dataImage = new float[MNIST_IMAGE_HEIGHT * MNIST_IMAGE_WIDTH];
+    private static double[] convert2DataArray(int[][] matrix) {
+        double[] dataImage = new double[MNIST_IMAGE_HEIGHT * MNIST_IMAGE_WIDTH];
 
         int d = 0;
         for(int i=0;i<matrix.length;i++){
             for(int j=0;j<matrix[0].length;j++){
-                dataImage[d++] = matrix[i][j] / 255.0f;
+                dataImage[d++] = matrix[i][j] / 255.0d;
             }
         }
         return dataImage;
     }
 
-    private static float[] convert2HotEncodedArray(int label) {
-        float[] hotEncodedLabel = new float[NUM_OF_CLASSES];
-        hotEncodedLabel[label] = 1f;
+    private static double[] convert2HotEncodedArray(int label) {
+        double[] hotEncodedLabel = new double[NUM_OF_CLASSES];
+        hotEncodedLabel[label] = 1d;
         return hotEncodedLabel;
     }
 
