@@ -80,5 +80,12 @@ public class MeanSquaredError extends LossFunction {
         return outputPrime;
     }
 
+    @Override
+    public double errorCostPrime(Pair<Double, Double> outputPair){
+        double y = outputPair.getValue0();
+        double yPrime = outputPair.getValue1();
 
+//        return (yPrime - y ) * activationFunction.activatePrime(yPrime);
+        return yPrime - y;
+    }
 }

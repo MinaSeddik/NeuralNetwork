@@ -1,5 +1,6 @@
 package com.mina.ml.neuralnetwork.layer;
 
+import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
 
 public abstract class Layerrr {
@@ -13,6 +14,8 @@ public abstract class Layerrr {
     protected int numOfOutputs;
 
     protected NetworkLayerType networkLayerType = NetworkLayerType.OUTPUT;
+
+    protected ActivationFunction activationFunction;
 
     public void setIndex(int index) {
         layerIndex = index;
@@ -53,4 +56,10 @@ public abstract class Layerrr {
     public abstract int getNumberOfParameter();
 
     public abstract Matrix forwardPropagation(Matrix input);
+
+    public abstract void backPropagation(Matrix costPrime);
+
+    public ActivationFunction getActivationFunction() {
+        return activationFunction;
+    }
 }

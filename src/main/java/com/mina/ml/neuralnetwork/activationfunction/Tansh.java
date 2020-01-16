@@ -19,7 +19,7 @@ public class Tansh extends ActivationFunction {
 
     @Override
     public double activatePrime(double value) {
-        return 1d - (float) Math.pow(activate(value), 2);
+        return 1d - Math.pow(activate(value), 2);
     }
 
 }

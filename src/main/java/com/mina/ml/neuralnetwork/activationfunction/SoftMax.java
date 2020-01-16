@@ -52,7 +52,7 @@ public class SoftMax extends ActivationFunction {
     @Override
     public double activatePrime(double value) {
         // un-defined function
-        return 0d;
+        return 1d;
     }
 
 }

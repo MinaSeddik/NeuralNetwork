@@ -77,4 +77,16 @@ public class CategoricalCrossEntropyLoss extends LossFunction {
         return outputPrime;
     }
 
+    @Override
+    public double errorCostPrime(Pair<Double, Double> outputPair) {
+        double y = outputPair.getValue0();
+        double yPrime = outputPair.getValue1();
+
+//        return activationFunction instanceof SoftMax ?
+//                yPrime - y : ((-y / yPrime) + ((1 - y) / (1 - yPrime))) * activationFunction.activatePrime(yPrime);
+
+        // assume that the output layer activation function is softmax
+        return yPrime - y;
+    }
+
 }

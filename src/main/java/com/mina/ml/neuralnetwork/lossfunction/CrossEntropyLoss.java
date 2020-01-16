@@ -2,16 +2,12 @@ package com.mina.ml.neuralnetwork.lossfunction;
 
 import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
 import com.mina.ml.neuralnetwork.activationfunction.SoftMax;
-import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.MatrixManipulator;
 import com.mina.ml.neuralnetwork.util.Vector;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
@@ -67,7 +63,7 @@ public class CrossEntropyLoss extends LossFunction {
     }
 
     @Override
-    public double errorCost(Pair<Vector, Vector> pVector){
+    public double errorCost(Pair<Vector, Vector> pVector) {
         double[] y = pVector.getValue0().asArray();
         double[] yPrime = pVector.getValue1().asArray();
 
@@ -108,6 +104,18 @@ public class CrossEntropyLoss extends LossFunction {
 
 //        MatrixManipulator.debugMatrix("CrossEntropyLoss calculated costPrimes: ", outputPrime);
         return outputPrime;
+    }
+
+    @Override
+    public double errorCostPrime(Pair<Double, Double> outputPair) {
+        double y = outputPair.getValue0();
+        double yPrime = outputPair.getValue1();
+
+//        return activationFunction instanceof SoftMax ?
+//                yPrime - y : ((-y / yPrime) + ((1 - y) / (1 - yPrime))) * activationFunction.activatePrime(yPrime);
+
+        // assume that the output layer activation function is softmax
+        return yPrime - y;
     }
 
 }

@@ -29,5 +29,7 @@ public interface Constants {
 
     String MEAN_SQUARED_ERROR_LOSS_FUNCTION = "MeanSquaredError";
     String CROSS_ENTROPY_LOSS_FUNCTION = "CrossEntropyLoss";
+    String BINARY_CROSS_ENTROPY_LOSS_FUNCTION = "binary_crossentropy";
+    String CATEGORICAL_CROSS_ENTROPY_LOSS_FUNCTION = "categorical_crossentropy";
 
 }

@@ -28,6 +28,8 @@ public class Sequential extends Model {
     private List<Dense> layers = new ArrayList<>();
     private LossFunction lossFunction;
 
+    private Optimizer optimizer;
+
     public Sequential(Dense[] array) {
         Arrays.stream(array).forEach(e -> add(e));
     }
@@ -77,6 +79,8 @@ public class Sequential extends Model {
     public void compile(Optimizer optimizer, String loss, String metrics) {
         layers.stream().forEach(layer -> layer.buildupLayer());
 
+        this.optimizer = optimizer;
+
         LossFunctionFactory lossFunctionFactory = new LossFunctionFactory();
         try {
             logger.debug("Setup the Loss Function = {}", loss);
@@ -93,13 +97,14 @@ public class Sequential extends Model {
     @Override
     public void fit(List<double[]> x, List<double[]> y, float validationSplit, boolean shuffle, int batchSize, int epochs, Verbosity verbosity) {
 
-        Stopwatch stopwatch;
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Layerrr inputLayer = layers.get(0);
+        Layerrr outputLayer = layers.get(layers.size()-1);
         Splitter<double[]> splitter = new Splitter(x, y, shuffle);
         for (int epoch = 1; epoch <= epochs; epoch++) {
 
+            stopwatch.reset().start();
             // Handle verbosity
-            stopwatch = Stopwatch.createStarted();
             String log = "Epoch " + epoch + "/" + epochs;
             System.out.println(log);
 
@@ -111,23 +116,26 @@ public class Sequential extends Model {
             List<double[]> yTest = dataset.getValue3();
 
             Partitioner<double[]> partitioner = new Partitioner<>(xTrain, yTrain, batchSize);
+            double meanError = 0;
+            int batchCount = 0;
             while (partitioner.hasNext()) {
 
                 Pair<List<double[]>, List<double[]>> batch = partitioner.getNext();
                 Matrix xBatch = new Matrix(batch.getValue0());
                 Matrix yBatch = new Matrix(batch.getValue1());
+                batchCount++;
+
+                optimizer.optimize(inputLayer, outputLayer,lossFunction, xBatch, yBatch);
 
 
-                Matrix yPrimeBatch = inputLayer.forwardPropagation(xBatch);
-
-                double meanError = lossFunction.reducedMeanError2(yBatch, yPrimeBatch);
 
             }
 
+            meanError/= batchCount;
             stopwatch.stop();
             long timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
-            System.out.println(timeElapsed + "s");
-            System.exit(0);
+            System.out.println(timeElapsed + "s meanError = " + meanError);
+//            System.exit(0);
 
         }
     }

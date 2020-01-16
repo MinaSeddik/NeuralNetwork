@@ -1,5 +1,6 @@
 package com.mina.ml.neuralnetwork.util;
 
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +97,12 @@ public class Matrix extends CollectionParallelizer<double[][]>{
 
     public Matrix apply(Function<Double, Double> function) {
         parallelizeOperation((start, end) -> apply(function, start, end));
+
+        return this;
+    }
+
+    public Matrix apply(Matrix mat1, Matrix mat2, Function<Pair<Double, Double>, Double> function) {
+        parallelizeOperation((start, end) -> apply(mat1, mat2, function, start, end));
 
         return this;
     }
@@ -210,6 +217,14 @@ public class Matrix extends CollectionParallelizer<double[][]>{
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
                 collection[i][j] = function.apply(collection[i][j]);
+            }
+        }
+    }
+
+    private void apply(Matrix mat1, Matrix mat2, Function<Pair<Double, Double>, Double> function, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[0].length; j++) {
+                collection[i][j] = function.apply(new Pair<Double, Double>(mat1.collection[i][j], mat2.collection[i][j]));
             }
         }
     }
