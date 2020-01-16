@@ -1,5 +1,6 @@
 package com.mina.ml.neuralnetwork.activationfunction;
 
+import com.mina.ml.neuralnetwork.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -57,6 +59,11 @@ public abstract class ActivationFunction {
         }
 
         return result;
+    }
+
+    /* new implementation */
+    public Matrix activate(Matrix matrix) {
+        return matrix.apply(val -> activate(val));
     }
 
     public void activatePrime(double[][] matrix, double[][] result, int startIndex, int endIndex) {

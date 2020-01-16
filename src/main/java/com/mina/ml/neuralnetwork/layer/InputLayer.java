@@ -22,9 +22,9 @@ public class InputLayer extends Layer {
 
 //        MatrixManipulator.debugMatrix("before add onces: ", input);
 
-
+        System.out.println(String.format("Input input = (%d, %d)", input.length, input[0].length));
         double[][] outMatrix = MatrixManipulator.addColumnOfOnes(input);
-
+        System.out.println(String.format("Input, After adding bias, input = (%d, %d)", outMatrix.length, outMatrix[0].length));
 //        MatrixManipulator.debugMatrix("after add onces: ", outMatrix);
 //        System.exit(0);
 //        MatrixManipulator.debugMatrix(layerName + " input [*After Adding Column of Ones*]:", outMatrix);

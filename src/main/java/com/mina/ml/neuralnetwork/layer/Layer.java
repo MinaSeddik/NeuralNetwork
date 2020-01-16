@@ -65,7 +65,7 @@ public abstract class Layer {
         double rangeMin = -1.0d;
         double rangeMax = 1.0d;
         Random r = new Random();
-//        r.setSeed(0);
+
 
         logger.debug(String.format("Initializing Weights between [%.2f] and [%.2f]", rangeMin, rangeMax));
         for (int i = 0; i < weight.length; i++) {
