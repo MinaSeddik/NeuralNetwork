@@ -309,4 +309,38 @@ public class MatrixManipulator {
         }
         logger.info(matrixAsString.toString());
     }
+
+    public static String simulate(String label, int rows, int cols, char r, char c) {
+        StringBuffer matrixAsString = new StringBuffer(label + "\n");
+
+        boolean rowPrinted;
+        boolean colPrinted;
+        int voidRowsCount = 0;
+        String val;
+        for (int x = 0; x < rows; x++) {
+            colPrinted = false;
+            rowPrinted = false;
+            for (int y = 0; y < cols; y++) {
+                if ((x == 0 || x == 1 || x == 2 || x + 1 == rows || x + 2 == rows) &&
+                        (y <= 3 || y + 1 == cols || y + 2 == cols)) {
+                    val = String.format("%c%d%c%d\t", r, x, c, y);
+                    rowPrinted = true;
+                } else if (rowPrinted && !colPrinted) {
+                    val = "...  ";
+                    colPrinted = true;
+                } else if (!rowPrinted && !colPrinted && voidRowsCount < 3) {
+                    val = "..\t..";
+                    rowPrinted = true;
+                    colPrinted = true;
+                    voidRowsCount++;
+                } else {
+                    val = "";
+                }
+                matrixAsString.append(val);
+            }
+            matrixAsString.append(rowPrinted || colPrinted || voidRowsCount < 3 ? "\n":"");
+        }
+//        logger.info(matrixAsString.toString());
+        return matrixAsString.toString();
+    }
 }

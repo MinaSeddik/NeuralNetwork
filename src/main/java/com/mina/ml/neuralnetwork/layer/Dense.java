@@ -66,6 +66,9 @@ public class Dense extends Layerrr {
     public Matrix forwardPropagation(Matrix input) {
 //        System.out.println("------------------------");
 //        System.out.println("Input Shape: " + input.shape());
+        String printedMatrix = MatrixManipulator.simulate("Input " + input.shape(), input.getRowCount(), input.getColumnCount(), 'b', 'x');
+        System.out.println(printedMatrix);
+        System.exit(0);
         input = addBias(input);
 //        System.out.println("Input Shape (After Bias): " + input.shape());
 //        System.out.println("weight Shape: " + weight.shape());
