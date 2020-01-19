@@ -30,10 +30,10 @@ public class Vector extends CollectionParallelizer<double[]> {
 
     public Vector apply(List<Vector> v1, List<Vector> v2, Function<Pair<Vector, Vector>, Double> function) {
         assert v1.size() == v2.size();
+        double[] result = new double[v1.size()];
+        parallelizeOperation((start, end) -> apply(result, v1, v2, function, start, end));
 
-        parallelizeOperation((start, end) -> apply(v1, v2, function, start, end));
-
-        return this;
+        return new Vector(result);
     }
 
     public int size() {
@@ -48,16 +48,16 @@ public class Vector extends CollectionParallelizer<double[]> {
         return collection;
     }
 
-    private void apply(List<Vector> v1, List<Vector> v2,
+    private void apply(double[] result, List<Vector> v1, List<Vector> v2,
                        Function<Pair<Vector, Vector>, Double> function, int startIndex, int endIndex) {
 
         for (int i = startIndex; i < endIndex; i++) {
-            collection[i] = function.apply(new Pair<>(v1.get(i), v2.get(i)));
+            result[i] = function.apply(new Pair<>(v1.get(i), v2.get(i)));
         }
     }
 
     @Override
-    public int getSize(){
+    public int getSize() {
         return collection.length;
     }
 }

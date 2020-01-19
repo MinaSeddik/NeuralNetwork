@@ -65,6 +65,7 @@ public abstract class Layer {
         double rangeMin = -1.0d;
         double rangeMax = 1.0d;
         Random r = new Random();
+        r.setSeed(100);
 
 
         logger.debug(String.format("Initializing Weights between [%.2f] and [%.2f]", rangeMin, rangeMax));
@@ -207,5 +208,17 @@ public abstract class Layer {
             logger.debug("Update weights for the next Layer");
             nextLayer.updateWeights();
         }
+    }
+
+    public double[][] getW() {
+        return weight;
+    }
+
+    public double[][] getA() {
+        return A;
+    }
+
+    public double[][] getZ() {
+        return Z;
     }
 }

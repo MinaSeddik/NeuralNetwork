@@ -4,19 +4,16 @@ import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-public class Matrix extends CollectionParallelizer<double[][]>{
+public class Matrix extends CollectionParallelizer<double[][]> {
 
     private final static Logger logger = LoggerFactory.getLogger(Matrix.class);
-
-//    protected double[][] matrix;
 
     public Matrix(int rows, int columns) {
         collection = new double[rows][columns];
@@ -46,65 +43,71 @@ public class Matrix extends CollectionParallelizer<double[][]>{
 
         double[][] result = new double[getRowCount()][mat.getColumnCount()];
         parallelizeOperation((start, end) -> dot(result, mat.getMatrix(), start, end));
-        collection = result;
 
-        return this;
+        return new Matrix(result);
     }
 
-    public Matrix elementWiseProduct(double[][] mat) {
-        double[][] result = new double[collection.length][mat[0].length];
-        parallelizeOperation((start, end) -> elementWiseProduct(result, mat, start, end));
-        collection = result;
+    public Matrix elementWiseProduct(Matrix mat) {
+        double[][] result = new double[collection.length][mat.collection[0].length];
+        parallelizeOperation((start, end) -> elementWiseProduct(result, mat.collection, start, end));
 
-        return this;
+        return new Matrix(result);
     }
 
     public Matrix add(Matrix mat) {
-        parallelizeOperation((start, end) -> add(mat.getMatrix(), start, end));
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> add(result, mat.getMatrix(), start, end));
 
-        return this;
+        return new Matrix(result);
     }
 
     public Matrix divide(double value) {
-        parallelizeOperation((start, end) -> divide(value, start, end));
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> divide(result, value, start, end));
 
-        return this;
+        return new Matrix(result);
     }
 
     public Matrix addColumn(double value) {
         double[][] result = new double[collection.length][collection[0].length + 1];
         parallelizeOperation((start, end) -> addColumn(result, value, start, end));
-        collection = result;
 
-        return this;
+        return new Matrix(result);
     }
 
     public Matrix transpose() {
         double[][] result = new double[collection[0].length][collection.length];
         parallelizeOperation((start, end) -> transpose(result, start, end));
-        collection = result;
 
-        return this;
+        return new Matrix(result);
     }
 
     public Matrix removeFirstColumn() {
         double[][] result = new double[collection.length][collection[0].length - 1];
         parallelizeOperation((start, end) -> removeFirstColumn(result, start, end));
-        collection = result;
 
-        return this;
+        return new Matrix(result);
     }
 
     public Matrix apply(Function<Double, Double> function) {
-        parallelizeOperation((start, end) -> apply(function, start, end));
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> apply(result, function, start, end));
 
-        return this;
+        return new Matrix(result);
+    }
+
+    public Matrix apply(BigDecimal[] totals, Function<Pair<Double, BigDecimal>, Double> function) {
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> apply(result, totals, function, start, end));
+
+        return new Matrix(result);
     }
 
     public Matrix apply(Matrix mat1, Matrix mat2, Function<Pair<Double, Double>, Double> function) {
-        parallelizeOperation((start, end) -> apply(mat1, mat2, function, start, end));
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> apply(result, mat1, mat2, function, start, end));
 
-        return this;
+        return new Matrix(result);
     }
 
     public Matrix clone() {
@@ -172,18 +175,18 @@ public class Matrix extends CollectionParallelizer<double[][]>{
         }
     }
 
-    private void add(double[][] mat, int startIndex, int endIndex) {
+    private void add(double[][] result, double[][] mat, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
-                collection[i][j] += mat[i][j];
+                result[i][j] = collection[i][j] + mat[i][j];
             }
         }
     }
 
-    private void divide(double value, int startIndex, int endIndex) {
+    private void divide(double[][] result, double value, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
-                collection[i][j] /= value;
+                result[i][j] = collection[i][j] / value;
             }
         }
     }
@@ -213,18 +216,26 @@ public class Matrix extends CollectionParallelizer<double[][]>{
         }
     }
 
-    private void apply(Function<Double, Double> function, int startIndex, int endIndex) {
+    private void apply(double[][] result, Function<Double, Double> function, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
-                collection[i][j] = function.apply(collection[i][j]);
+                result[i][j] = function.apply(collection[i][j]);
             }
         }
     }
 
-    private void apply(Matrix mat1, Matrix mat2, Function<Pair<Double, Double>, Double> function, int startIndex, int endIndex) {
+    private void apply(double[][] result, BigDecimal[] totals, Function<Pair<Double, BigDecimal>, Double> function, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
-                collection[i][j] = function.apply(new Pair<Double, Double>(mat1.collection[i][j], mat2.collection[i][j]));
+                result[i][j] = function.apply(new Pair<Double, BigDecimal>(collection[i][j], totals[i]));
+            }
+        }
+    }
+
+    private void apply(double[][] result, Matrix mat1, Matrix mat2, Function<Pair<Double, Double>, Double> function, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[0].length; j++) {
+                result[i][j] = function.apply(new Pair<Double, Double>(mat1.collection[i][j], mat2.collection[i][j]));
             }
         }
     }
@@ -241,12 +252,12 @@ public class Matrix extends CollectionParallelizer<double[][]>{
         return String.format("(%d, %d)", collection.length, collection[0].length);
     }
 
-    public boolean sameShape(Matrix mat){
+    public boolean sameShape(Matrix mat) {
         return getRowCount() == mat.getRowCount() && getColumnCount() == mat.getColumnCount();
     }
 
     @Override
-    public int getSize(){
+    public int getSize() {
         return getRowCount();
     }
 

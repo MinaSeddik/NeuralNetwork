@@ -5,6 +5,7 @@ import com.mina.ml.neuralnetwork.factory.LossFunctionFactory;
 import com.mina.ml.neuralnetwork.factory.Optimizer;
 import com.mina.ml.neuralnetwork.lossfunction.LossFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
+import com.mina.ml.neuralnetwork.util.MatrixManipulator;
 import com.mina.ml.neuralnetwork.util.Partitioner;
 import com.mina.ml.neuralnetwork.util.Splitter;
 import org.javatuples.Pair;
@@ -94,9 +95,9 @@ public class Sequential extends Model {
 
     }
 
+
     @Override
     public void fit(List<double[]> x, List<double[]> y, float validationSplit, boolean shuffle, int batchSize, int epochs, Verbosity verbosity) {
-
         Stopwatch stopwatch = Stopwatch.createStarted();
         Layerrr inputLayer = layers.get(0);
         Layerrr outputLayer = layers.get(layers.size()-1);
@@ -120,14 +121,21 @@ public class Sequential extends Model {
             int batchCount = 0;
             while (partitioner.hasNext()) {
 
+                Stopwatch s1 = Stopwatch.createStarted();
                 Pair<List<double[]>, List<double[]>> batch = partitioner.getNext();
                 Matrix xBatch = new Matrix(batch.getValue0());
                 Matrix yBatch = new Matrix(batch.getValue1());
                 batchCount++;
 
-                optimizer.optimize(inputLayer, outputLayer,lossFunction, xBatch, yBatch);
+//                s1.stop().start();
+//                long t = stopwatch.elapsed(TimeUnit.SECONDS);
+//                System.out.println(String.format("Batch %d = %ds", batchCount, t));
 
+                meanError = optimizer.optimize(inputLayer, outputLayer, lossFunction, xBatch, yBatch);
 
+                s1.stop();
+                long t = s1.elapsed(TimeUnit.SECONDS);
+                System.out.println(String.format("Batch %d = %ds", batchCount, t));
 
             }
 
@@ -135,8 +143,107 @@ public class Sequential extends Model {
             stopwatch.stop();
             long timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
             System.out.println(timeElapsed + "s meanError = " + meanError);
-//            System.exit(0);
 
         }
+    }
+
+    private void compareWeights(Layerrr nl, Layer ol) {
+
+        // compare input layer
+        double[][] n1 = nl.getW();
+
+        ol = ol.nextLayer;
+        double[][] o1 = ol.getW();
+        System.out.println("first input layer weights comparison: " + MatrixManipulator.compare(n1, o1));
+
+        nl = nl.nextDense;
+        ol = ol.nextLayer;
+        n1 = nl.getW();
+        o1 = ol.getW();
+        System.out.println("second input layer weights comparison: " + MatrixManipulator.compare(n1, o1));
+
+        nl = nl.nextDense;
+        ol = ol.nextLayer;
+        n1 = nl.getW();
+        o1 = ol.getW();
+        System.out.println("3rd input layer weights comparison: " + MatrixManipulator.compare(n1, o1));
+
+//        System.exit(0);
+
+    }
+
+    private void compareAZ(Layerrr nl, Layer ol) {
+
+        // compare input layer
+        double[][] n1 = nl.getA();
+
+        ol = ol.nextLayer;
+        double[][] o1 = ol.getA();
+        System.out.println("first layer A comparison: " + MatrixManipulator.compare(n1, o1));
+        n1 = nl.getZ();
+        o1 = ol.getZ();
+        System.out.println("first layer Z comparison: " + MatrixManipulator.compare(n1, o1));
+
+        nl = nl.nextDense;
+        ol = ol.nextLayer;
+        n1 = nl.getA();
+        o1 = ol.getA();
+        System.out.println("second layer A comparison: " + MatrixManipulator.compare(n1, o1));
+        n1 = nl.getZ();
+        o1 = ol.getZ();
+        System.out.println("second layer Z comparison: " + MatrixManipulator.compare(n1, o1));
+
+        nl = nl.nextDense;
+        ol = ol.nextLayer;
+        n1 = nl.getA();
+        o1 = ol.getA();
+        System.out.println("third layer A comparison: " + MatrixManipulator.compare(n1, o1));
+        n1 = nl.getZ();
+        o1 = ol.getZ();
+        System.out.println("third layer Z comparison: " + MatrixManipulator.compare(n1, o1));
+        System.exit(0);
+
+//        System.exit(0);
+
+    }
+
+    private Layer inputLayerOld;
+    private Layer outputLayer;
+
+    private void setupOld() {
+
+        inputLayerOld = new InputLayer("Input Layer", 28*28);
+        Layer prevLayer = inputLayerOld;
+
+        // Hidden Layer 1
+        Layer layer = new HiddenLayer("Hidden Layer [" + 1 + "]", prevLayer.getNumberOfOutputs(),
+                64, "relu", 0.001);
+        layer.setPreviousLayer(prevLayer);
+        prevLayer.setNextLayer(layer);
+        prevLayer = layer;
+
+        // Hidden Layer 2
+        layer = new HiddenLayer("Hidden Layer [" + 2 + "]", prevLayer.getNumberOfOutputs(),
+                64, "relu", 0.001);
+        layer.setPreviousLayer(prevLayer);
+        prevLayer.setNextLayer(layer);
+        prevLayer = layer;
+
+
+        outputLayer = new OutputLayer("Output Layer", prevLayer.getNumberOfOutputs(), 10,
+                "softmax", 0.001);
+
+        outputLayer.setPreviousLayer(prevLayer);
+        prevLayer.setNextLayer(outputLayer);
+
+        LossFunctionFactory lossFunctionFactory = new LossFunctionFactory();
+        try {
+            lossFunction = lossFunctionFactory.createLossFunction("CrossEntropyLoss");
+        } catch (Exception ex) {
+            logger.error("Exception: {} occurred {}", ex.getClass(), ex);
+        }
+
+        int batchSize = 128;
+        int maxEpoch = 100;
     }
 }

@@ -21,9 +21,9 @@ public class HiddenLayer extends Layer {
 //        MatrixManipulator.debugMatrix(layerName + " input:", input);
 //        MatrixManipulator.debugMatrix(layerName + " weight:", weight);
 
-        System.out.println(String.format("Hidden input = (%d, %d)", input.length, input[0].length));
-        System.out.println(String.format("Hidden weight = (%d, %d)", weight.length, weight[0].length));
-        System.exit(0);
+//        System.out.println(String.format("Hidden input = (%d, %d)", input.length, input[0].length));
+//        System.out.println(String.format("Hidden weight = (%d, %d)", weight.length, weight[0].length));
+//        System.exit(0);
 
         A = MatrixManipulator.multiply(input, weight);
 //        MatrixManipulator.debugMatrix(layerName + " A:", A);

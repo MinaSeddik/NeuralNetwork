@@ -1,7 +1,7 @@
 package com.mina.ml.neuralnetwork.factory;
 
-import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
 import com.mina.ml.neuralnetwork.layer.Layerrr;
+import com.mina.ml.neuralnetwork.layer.Verbosity;
 import com.mina.ml.neuralnetwork.lossfunction.LossFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
 import org.slf4j.Logger;
@@ -15,6 +15,8 @@ public class Optimizer {
 
     private double learningRate;
 
+    private Verbosity verbosity = Verbosity.NORMAL;
+
     public Optimizer() {
         this(LEARNING_RATE);
     }
@@ -23,19 +25,26 @@ public class Optimizer {
         this.learningRate = learningRate;
     }
 
-    public void optimize(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Matrix x, Matrix y){
+    public void setVerbosity(Verbosity verbosity) {
+        this.verbosity = verbosity;
+    }
+
+    public double optimize(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Matrix x, Matrix y) {
 
         Matrix yPrime = inputLayer.forwardPropagation(x);
 
-        double meanError = lossFunction.meanErrorCost(y, yPrime);
+        double lossCost = lossFunction.meanErrorCost(y, yPrime);
 
         Matrix errorCostPrime = lossFunction.errorCostPrime(y, yPrime);
 
         outputLayer.backPropagation(errorCostPrime);
+        inputLayer.updateWeight(learningRate);
 
-//        inputLayer.updateWeights();
+        return lossCost;
+    }
 
-
+    public void diagnose(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Matrix x, Matrix y) {
+        inputLayer.printForwardPropagation(x);
     }
 
 }

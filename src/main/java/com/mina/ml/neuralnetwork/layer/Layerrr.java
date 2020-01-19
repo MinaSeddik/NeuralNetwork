@@ -2,8 +2,14 @@ package com.mina.ml.neuralnetwork.layer;
 
 import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
+import com.mina.ml.neuralnetwork.util.WeightMatrix;
 
 public abstract class Layerrr {
+
+
+    protected Matrix input;
+    protected Matrix A;
+    protected Matrix Z;
 
     protected int layerIndex;
 
@@ -12,6 +18,8 @@ public abstract class Layerrr {
 
     protected int numOfInputs;
     protected int numOfOutputs;
+
+    protected WeightMatrix weight;
 
     protected NetworkLayerType networkLayerType = NetworkLayerType.OUTPUT;
 
@@ -57,9 +65,25 @@ public abstract class Layerrr {
 
     public abstract Matrix forwardPropagation(Matrix input);
 
+    public abstract void printForwardPropagation(Matrix input);
+
     public abstract void backPropagation(Matrix costPrime);
+
+    public abstract void updateWeight(double learningRate);
 
     public ActivationFunction getActivationFunction() {
         return activationFunction;
+    }
+
+    public double[][] getW() {
+        return weight.getMatrix();
+    }
+
+    public double[][] getA() {
+        return A.getMatrix();
+    }
+
+    public double[][] getZ() {
+        return Z.getMatrix();
     }
 }

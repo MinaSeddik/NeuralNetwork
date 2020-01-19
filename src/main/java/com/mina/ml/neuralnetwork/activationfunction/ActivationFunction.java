@@ -66,6 +66,10 @@ public abstract class ActivationFunction {
         return matrix.apply(val -> activate(val));
     }
 
+    public Matrix activatePrime(Matrix matrix) {
+        return matrix.apply(val -> activatePrime(val));
+    }
+
     public void activatePrime(double[][] matrix, double[][] result, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < matrix[0].length; j++) {

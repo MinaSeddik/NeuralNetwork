@@ -43,12 +43,14 @@ public abstract class LossFunction {
         List<Vector> yVec = y.asVectors();
         List<Vector> yPrimeVec = yPrime.asVectors();
 
-        costs.apply(yVec, yPrimeVec, vp -> errorCost(vp));
+        costs = costs.apply(yVec, yPrimeVec, vp -> errorCost(vp));
 
         return Arrays.stream(costs.asArray())
                 .average()
                 .getAsDouble();
     }
+
+    public abstract double errorCost(Pair<Vector, Vector> pVector);
 
     public Matrix errorCostPrime(Matrix y, Matrix yPrime) {
         assert y.sameShape(yPrime);
@@ -56,8 +58,6 @@ public abstract class LossFunction {
         return new Matrix(y.getRowCount(), y.getColumnCount())
                 .apply(y, yPrime, vp -> errorCostPrime(vp));
     }
-
-    public abstract double errorCost(Pair<Vector, Vector> pVector);
 
     public abstract double errorCostPrime(Pair<Double, Double> outputPair);
 
