@@ -115,6 +115,7 @@ public class CrossEntropyLoss extends LossFunction {
 //                yPrime - y : ((-y / yPrime) + ((1 - y) / (1 - yPrime))) * activationFunction.activatePrime(yPrime);
 
         // assume that the output layer activation function is softmax
+//        return ((-y / yPrime) + ((1 - y) / (1 - yPrime)));
         return yPrime - y;
     }
 

@@ -110,6 +110,13 @@ public class Matrix extends CollectionParallelizer<double[][]> {
         return new Matrix(result);
     }
 
+    public Matrix addMatrices(List<Matrix> deltas) {
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> add(result, deltas, start, end));
+
+        return new Matrix(result);
+    }
+
     public Matrix clone() {
         double[][] copy = Arrays.stream(collection).map(double[]::clone).toArray(double[][]::new);
         return new Matrix(copy);
@@ -179,6 +186,16 @@ public class Matrix extends CollectionParallelizer<double[][]> {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
                 result[i][j] = collection[i][j] + mat[i][j];
+            }
+        }
+    }
+
+    private void add(double[][] result, List<Matrix> deltas, int startIndex, int endIndex) {
+        for (Matrix mat : deltas) {
+            for (int i = startIndex; i < endIndex; i++) {
+                for (int j = 0; j < collection[0].length; j++) {
+                    result[i][j] = collection[i][j] + mat.getMatrix()[i][j];
+                }
             }
         }
     }
@@ -285,5 +302,6 @@ public class Matrix extends CollectionParallelizer<double[][]> {
         }
         logger.info(matrixAsString.toString());
     }
+
 
 }

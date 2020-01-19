@@ -1,8 +1,9 @@
 package com.mina.ml.neuralnetwork.layer;
 
-import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
 import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
-import com.mina.ml.neuralnetwork.util.*;
+import com.mina.ml.neuralnetwork.util.Matrix;
+import com.mina.ml.neuralnetwork.util.MatrixLogger;
+import com.mina.ml.neuralnetwork.util.WeightMatrix;
 import org.javatuples.Tuple;
 import org.javatuples.Unit;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Dense extends Layerrr {
@@ -19,7 +21,6 @@ public class Dense extends Layerrr {
 
 
     protected Matrix deltaWeight;
-    private ReentrantLock deltaWeightLock = new ReentrantLock();
 
 
     private String activationFunctionStr;
@@ -97,7 +98,7 @@ public class Dense extends Layerrr {
 
         System.out.println("---------------------------------------");
 
-        if(!Objects.isNull(nextDense)){
+        if (!Objects.isNull(nextDense)) {
             nextDense.printForwardPropagation(Z);
         }
 
@@ -113,7 +114,7 @@ public class Dense extends Layerrr {
     }
 
     @Override
-    public void backPropagation(Matrix costPrime){
+    public void backPropagation(Matrix costPrime) {
 //        /* output */
 //        calculateDeltaWeight(costOutputPrime);
 //        prepareErrorCostThenBackPropagate(costOutputPrime);
@@ -144,17 +145,23 @@ public class Dense extends Layerrr {
 //        System.out.println("weight shape = " + weight.shape());
 //        System.out.println("deltaWeight shape = " + deltaWeight.shape());
 
+//        List<Matrix> deltas = Collections.synchronizedList(new ArrayList<Matrix>());
+
         // Calculate delta-Weight (dE/dW)
-        deltaWeight.reset();
-        IntStream.range(0, input.getRowCount())
+//        deltaWeight.reset();
+        List<Matrix> deltas = IntStream.range(0, input.getRowCount())
                 .parallel()
                 .mapToObj(i -> input.getRowAsVector(i)
                         .toMatrix()
                         .transpose()
                         .dot(dE_dA.getRowAsVector(i)
                                 .toMatrix()))
-                .forEach(dw -> accumulateDeltaWeigh(dw));
-        deltaWeight.divide(input.getRowCount());
+                .collect(Collectors.toList());
+        Matrix totalDeltas = accumulateDeltaWeigh(deltas);
+//                .forEach(dw -> deltas.add(dw));
+//                .forEach(dw -> accumulateDeltaWeigh(dw));
+//        System.out.println(deltas.size());
+        deltaWeight = totalDeltas.divide(input.getRowCount());
 
         Matrix weightT = weight.transpose();
         Matrix cost = dE_dA.dot(weightT);
@@ -163,7 +170,7 @@ public class Dense extends Layerrr {
 //        System.out.println("dE_dA shape = " + dE_dA.shape());
 //        System.out.println("cost shape = " + cost.shape());
 
-        if(!Objects.isNull(previousDense)){
+        if (!Objects.isNull(previousDense)) {
             previousDense.backPropagation(cost);
         }
 
@@ -172,19 +179,17 @@ public class Dense extends Layerrr {
     @Override
     public void updateWeight(double learningRate) {
         weight.updateWeights(deltaWeight, learningRate);
-        if(!Objects.isNull(nextDense)){
+        if (!Objects.isNull(nextDense)) {
             nextDense.updateWeight(learningRate);
         }
     }
 
-    private void accumulateDeltaWeigh(Matrix dWeights) {
-        deltaWeightLock.lock();
-        try {
-            deltaWeight.add(dWeights);
-        } finally {
-            deltaWeightLock.unlock();
-        }
+    private Matrix accumulateDeltaWeigh(List<Matrix> deltas) {
+        return new Matrix(deltas.get(0).getRowCount(), deltas.get(0).getColumnCount())
+                .addMatrices(deltas);
     }
+
+
 
     @Override
     public String getName() {

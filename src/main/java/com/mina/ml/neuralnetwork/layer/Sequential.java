@@ -121,7 +121,7 @@ public class Sequential extends Model {
             int batchCount = 0;
             while (partitioner.hasNext()) {
 
-                Stopwatch s1 = Stopwatch.createStarted();
+//                Stopwatch s1 = Stopwatch.createStarted();
                 Pair<List<double[]>, List<double[]>> batch = partitioner.getNext();
                 Matrix xBatch = new Matrix(batch.getValue0());
                 Matrix yBatch = new Matrix(batch.getValue1());
@@ -132,10 +132,10 @@ public class Sequential extends Model {
 //                System.out.println(String.format("Batch %d = %ds", batchCount, t));
 
                 meanError = optimizer.optimize(inputLayer, outputLayer, lossFunction, xBatch, yBatch);
-
-                s1.stop();
-                long t = s1.elapsed(TimeUnit.SECONDS);
-                System.out.println(String.format("Batch %d = %ds", batchCount, t));
+//
+//                s1.stop();
+//                long t = s1.elapsed(TimeUnit.SECONDS);
+//                System.out.println(String.format("Batch %d = %ds", batchCount, t));
 
             }
 

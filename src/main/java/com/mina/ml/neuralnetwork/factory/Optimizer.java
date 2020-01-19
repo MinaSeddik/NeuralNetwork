@@ -38,6 +38,7 @@ public class Optimizer {
         Matrix errorCostPrime = lossFunction.errorCostPrime(y, yPrime);
 
         outputLayer.backPropagation(errorCostPrime);
+
         inputLayer.updateWeight(learningRate);
 
         return lossCost;
