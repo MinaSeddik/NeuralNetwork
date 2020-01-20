@@ -50,7 +50,23 @@ public abstract class LossFunction {
                 .getAsDouble();
     }
 
+    public double calculateAccuracy(Matrix y, Matrix yPrime) {
+        assert y.sameShape(yPrime);
+
+        Vector acc = new Vector(y.getRowCount());
+
+        List<Vector> yVec = y.asVectors();
+        List<Vector> yPrimeVec = yPrime.asVectors();
+
+        acc = acc.apply(yVec, yPrimeVec, vp -> accuracy(vp));
+
+        return Arrays.stream(acc.asArray())
+                .average()
+                .getAsDouble();
+    }
+
     public abstract double errorCost(Pair<Vector, Vector> pVector);
+    public abstract double accuracy(Pair<Vector, Vector> pVector);
 
     public Matrix errorCostPrime(Matrix y, Matrix yPrime) {
         assert y.sameShape(yPrime);

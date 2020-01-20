@@ -77,6 +77,25 @@ public class CrossEntropyLoss extends LossFunction {
     }
 
     @Override
+    public double accuracy(Pair<Vector, Vector> pVector) {
+        double[] labels = pVector.getValue0().asArray();
+        double[] output = pVector.getValue1().asArray();
+
+        // Reference: https://kharshit.github.io/blog/2018/12/07/loss-vs-accuracy
+        return labels[getMaxProbIndex(output)] == 1d ? 1d : 0d;
+    }
+
+    private int getMaxProbIndex(double[] array) {
+        int maxIndex = 0;
+        for (int i = 1; i < array.length; i++) {
+            if (array[i] > array[maxIndex]) {
+                maxIndex = i;
+            }
+        }
+        return maxIndex;
+    }
+
+    @Override
     public double[][] errorOutputPrime(double[][] labels, double[][] output, ActivationFunction activationFunction) {
 //        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCostPrime received labels: ", labels);
 //        MatrixManipulator.debugMatrix("CrossEntropyLoss calculates errorCostPrime received output: ", output);

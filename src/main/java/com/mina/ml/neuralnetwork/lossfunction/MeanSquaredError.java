@@ -1,15 +1,12 @@
 package com.mina.ml.neuralnetwork.lossfunction;
 
 import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
-import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.MatrixManipulator;
 import com.mina.ml.neuralnetwork.util.Vector;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
@@ -48,12 +45,26 @@ public class MeanSquaredError extends LossFunction {
     }
 
     @Override
-    public double errorCost(Pair<Vector, Vector> pVector){
+    public double errorCost(Pair<Vector, Vector> pVector) {
         double[] y = pVector.getValue0().asArray();
         double[] yPrime = pVector.getValue1().asArray();
 
         return IntStream.range(0, y.length)
-                .mapToDouble(i -> Math.pow(y[i] - yPrime[i], 2d)/2d).sum();
+                .mapToDouble(i -> Math.pow(y[i] - yPrime[i], 2d) / 2d).sum();
+    }
+
+    @Override
+    public double accuracy(Pair<Vector, Vector> pVector) {
+        double[] labels = pVector.getValue0().asArray();
+        double[] output = pVector.getValue1().asArray();
+
+        // Calculate the RMSE value
+        // Reference: https://hackernoon.com/how-to-measure-the-accuracy-of-a-predictive-model-or-algorithm-part-1-6a6c00c38687
+        double total = IntStream.range(0, labels.length)
+                .mapToDouble(i -> Math.abs(labels[i] - output[i]) / labels[i])
+                .sum();
+
+        return total / labels.length;
     }
 
     @Override
@@ -81,7 +92,7 @@ public class MeanSquaredError extends LossFunction {
     }
 
     @Override
-    public double errorCostPrime(Pair<Double, Double> outputPair){
+    public double errorCostPrime(Pair<Double, Double> outputPair) {
         double y = outputPair.getValue0();
         double yPrime = outputPair.getValue1();
 

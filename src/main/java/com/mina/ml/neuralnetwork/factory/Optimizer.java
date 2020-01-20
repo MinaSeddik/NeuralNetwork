@@ -4,6 +4,7 @@ import com.mina.ml.neuralnetwork.layer.Layerrr;
 import com.mina.ml.neuralnetwork.layer.Verbosity;
 import com.mina.ml.neuralnetwork.lossfunction.LossFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +30,12 @@ public class Optimizer {
         this.verbosity = verbosity;
     }
 
-    public double optimize(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Matrix x, Matrix y) {
+    public Pair<Double, Double> optimize(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Matrix x, Matrix y) {
 
         Matrix yPrime = inputLayer.forwardPropagation(x);
 
-        double lossCost = lossFunction.meanErrorCost(y, yPrime);
+        double loss = lossFunction.meanErrorCost(y, yPrime);
+        double acc = lossFunction.calculateAccuracy(y, yPrime);
 
         Matrix errorCostPrime = lossFunction.errorCostPrime(y, yPrime);
 
@@ -41,11 +43,7 @@ public class Optimizer {
 
         inputLayer.updateWeight(learningRate);
 
-        return lossCost;
-    }
-
-    public void diagnose(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Matrix x, Matrix y) {
-        inputLayer.printForwardPropagation(x);
+        return new Pair<>(loss, acc);
     }
 
 }

@@ -57,7 +57,6 @@ public class Main4 {
         double learningRate = 0.001;
         Optimizer optimizer = new Optimizer(learningRate);
         model.compile(optimizer, "categorical_crossentropy", "");
-//        model.compile(optimizer, "CrossEntropyLoss", "");
 
         model.fit(images, labels, 0.1f, true, 128, 1000, Verbosity.VERBOSE);
 
