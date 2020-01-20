@@ -6,6 +6,7 @@ import com.mina.ml.neuralnetwork.layer.Dense;
 import com.mina.ml.neuralnetwork.layer.Model;
 import com.mina.ml.neuralnetwork.layer.Sequential;
 import com.mina.ml.neuralnetwork.layer.Verbosity;
+import org.javatuples.Pair;
 import org.javatuples.Quartet;
 import org.javatuples.Tuple;
 import org.javatuples.Unit;
@@ -45,7 +46,9 @@ public class MNistNeuralNetwork {
 
         model.fit(xTrain, yTrain, 0.1f, true, 128, 1000, Verbosity.VERBOSE);
 
-        System.out.println("Done Successfully!");
+        Pair<Double, Double> testStats = model.evaluate(xTest, yTest);
+        double test_acc = testStats.getValue1();
+        System.out.println(String.format("Test accuracy: %.2f%%", (test_acc * 100)));
 
     }
 
