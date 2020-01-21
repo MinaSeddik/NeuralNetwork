@@ -3,9 +3,16 @@ package com.mina.ml.neuralnetwork.layer;
 import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.WeightMatrix;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class Layerrr {
+import java.io.Serializable;
 
+public abstract class Layerrr implements Serializable {
+
+    private static final long serialVersionUID = 6529685098267757690L;
+
+    private final static Logger logger = LoggerFactory.getLogger(Layerrr.class);
 
     protected Matrix input;
     protected Matrix A;

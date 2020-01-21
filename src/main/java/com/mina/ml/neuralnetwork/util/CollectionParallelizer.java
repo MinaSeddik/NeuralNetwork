@@ -3,12 +3,15 @@ package com.mina.ml.neuralnetwork.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public abstract class CollectionParallelizer<T> {
+public abstract class CollectionParallelizer<T> implements Serializable {
+
+    private static final long serialVersionUID = 6529685098267757690L;
 
     private final static Logger logger = LoggerFactory.getLogger(Matrix.class);
 

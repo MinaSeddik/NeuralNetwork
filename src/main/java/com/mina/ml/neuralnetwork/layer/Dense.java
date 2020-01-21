@@ -19,10 +19,7 @@ public class Dense extends Layerrr {
 
     private final static Logger logger = LoggerFactory.getLogger(Dense.class);
 
-
     protected Matrix deltaWeight;
-
-
     private String activationFunctionStr;
 
     public Dense(int units, Tuple inputShape, String activation) {

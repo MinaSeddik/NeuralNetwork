@@ -58,7 +58,7 @@ public class Main4 {
         Optimizer optimizer = new Optimizer(learningRate);
         model.compile(optimizer, "categorical_crossentropy", "");
 
-        model.fit(images, labels, 0.1f, true, 128, 1000, Verbosity.VERBOSE);
+        model.fit(images, labels, 0.1f, true, 128, 1000, Verbosity.VERBOSE, null);
 
 
     }

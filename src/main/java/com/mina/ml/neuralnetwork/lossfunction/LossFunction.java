@@ -7,13 +7,16 @@ import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by menai on 2019-01-31.
  */
-public abstract class LossFunction {
+public abstract class LossFunction implements Serializable {
+
+    private static final long serialVersionUID = 6529685098267757690L;
 
     private final static Logger logger = LoggerFactory.getLogger(LossFunction.class);
 

@@ -7,16 +7,14 @@ import com.mina.ml.neuralnetwork.lossfunction.LossFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.Partitioner;
 import com.mina.ml.neuralnetwork.util.Splitter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -29,6 +27,9 @@ public class Sequential extends Model {
     private LossFunction lossFunction;
 
     private Optimizer optimizer;
+
+    public static final String ACCURACY_METRICS = "accuracy";
+    private String metrics;
 
     public Sequential(Dense[] array) {
         Arrays.stream(array).forEach(e -> add(e));
@@ -90,12 +91,14 @@ public class Sequential extends Model {
             throw new RuntimeException(ex.getMessage());
         }
 
-        // TODO: handle the metrics
+        this.metrics = ACCURACY_METRICS;
 
     }
 
     @Override
-    public void fit(List<double[]> x, List<double[]> y, float validationSplit, boolean shuffle, int batchSize, int epochs, Verbosity verbosity) {
+    public void fit(List<double[]> x, List<double[]> y, float validationSplit, boolean shuffle, int batchSize,
+                    int epochs, Verbosity verbosity, List<ModelCheckpoint> callbacks) {
+
         Stopwatch stopwatch = Stopwatch.createStarted();
         Layerrr inputLayer = layers.get(0);
         Layerrr outputLayer = layers.get(layers.size() - 1);
@@ -138,6 +141,13 @@ public class Sequential extends Model {
 
             double valLoss = testLoss.getValue0();
             double valAcc = testLoss.getValue1();
+
+            // check if any callbacks defined
+            if(CollectionUtils.isNotEmpty(callbacks)){
+                // Handle the first call-back only
+                ModelCheckpoint modelCheckpoint = callbacks.get(0);
+//                modelCheckpoint.handle();
+            }
 
             stopwatch.stop();
             long timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
