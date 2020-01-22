@@ -14,6 +14,7 @@ import static com.mina.ml.neuralnetwork.Constants.*;
  */
 public class LossFunctionFactory {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(LossFunctionFactory.class);
 
     private Collection<String> lossFunctions = Arrays.asList(

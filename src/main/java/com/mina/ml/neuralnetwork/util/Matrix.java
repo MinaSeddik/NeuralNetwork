@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 public class Matrix extends CollectionParallelizer<double[][]> {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Matrix.class);
 
     public Matrix(int rows, int columns) {

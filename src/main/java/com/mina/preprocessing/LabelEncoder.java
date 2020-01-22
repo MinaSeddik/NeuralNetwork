@@ -1,11 +1,16 @@
 package com.mina.preprocessing;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class LabelEncoder {
+
+    private static final long serialVersionUID = 6529685098267757690L;
+    private final static Logger logger = LoggerFactory.getLogger(LabelEncoder.class);
 
     private Map<String, Integer> map = new HashMap<>();
 

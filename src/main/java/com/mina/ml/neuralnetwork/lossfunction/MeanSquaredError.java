@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
  */
 public class MeanSquaredError extends LossFunction {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(MeanSquaredError.class);
 
     @Override

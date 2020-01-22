@@ -14,6 +14,7 @@ import static com.mina.ml.neuralnetwork.Constants.*;
  */
 public class ActivationFunctionFactory {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(ActivationFunctionFactory.class);
 
     private Collection<String> activationFunctions = Arrays.asList(

@@ -1,10 +1,15 @@
 package com.mina.ml.neuralnetwork.util;
 
 import org.javatuples.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class Partitioner<T> {
+
+    private static final long serialVersionUID = 6529685098267757690L;
+    private final static Logger logger = LoggerFactory.getLogger(Partitioner.class);
 
     private List<T> x;
     private List<T> y;

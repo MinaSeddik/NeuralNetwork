@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 
 public class CategoricalCrossEntropyLoss extends LossFunction {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(CategoricalCrossEntropyLoss.class);
 
     @Override

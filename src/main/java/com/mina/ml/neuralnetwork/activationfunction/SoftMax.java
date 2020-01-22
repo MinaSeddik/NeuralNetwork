@@ -19,6 +19,7 @@ import java.util.stream.IntStream;
  */
 public class SoftMax extends ActivationFunction {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(SoftMax.class);
 
     @Override

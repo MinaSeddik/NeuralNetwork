@@ -4,9 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.mina.ml.neuralnetwork.factory.LossFunctionFactory;
 import com.mina.ml.neuralnetwork.factory.Optimizer;
 import com.mina.ml.neuralnetwork.lossfunction.LossFunction;
-import com.mina.ml.neuralnetwork.util.Matrix;
-import com.mina.ml.neuralnetwork.util.Partitioner;
-import com.mina.ml.neuralnetwork.util.Splitter;
+import com.mina.ml.neuralnetwork.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
@@ -18,9 +16,13 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static java.util.Map.entry;
 
 public class Sequential extends Model {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Sequential.class);
 
     private List<Dense> layers = new ArrayList<>();
@@ -92,7 +94,6 @@ public class Sequential extends Model {
         }
 
         this.metrics = ACCURACY_METRICS;
-
     }
 
     @Override
@@ -142,18 +143,24 @@ public class Sequential extends Model {
             double valLoss = testLoss.getValue0();
             double valAcc = testLoss.getValue1();
 
-            // check if any callbacks defined
-            if(CollectionUtils.isNotEmpty(callbacks)){
-                // Handle the first call-back only
-                ModelCheckpoint modelCheckpoint = callbacks.get(0);
-//                modelCheckpoint.handle();
-            }
-
             stopwatch.stop();
             long timeElapsed = stopwatch.elapsed(TimeUnit.SECONDS);
             log = String.format(" - %ds - loss: %.4f - acc: %.4f - val_loss: %.4f - val_acc: %.4f",
                     timeElapsed, loss, acc, valLoss, valAcc);
             System.out.println(log);
+
+            // check if any callbacks defined
+            if(CollectionUtils.isNotEmpty(callbacks)){
+                Map<String, Object> params = Map.ofEntries(
+                        entry("epoch", epoch),
+                        entry(ModelCheckpoint.TRAIN_LOSS, loss),
+                        entry(ModelCheckpoint.TRAIN_ACCURACY, acc),
+                        entry(ModelCheckpoint.VALIDATION_LOSS, valLoss),
+                        entry(ModelCheckpoint.VALIDATION_ACCURACY, valAcc)
+                );
+                // Handle the first callback only
+                callbacks.get(0).handle(params, layers);
+            }
 
         }
     }
@@ -172,5 +179,32 @@ public class Sequential extends Model {
 
         return new Pair<>(loss, acc);
     }
+
+    @Override
+    public void loadWeights(String modelFilePath){
+        Map<Integer, WeightMatrix> weights = FilesUtil.deSerializeData(modelFilePath);
+        layers.stream().forEach(l -> l.setWeights(weights.get(l.getIndex())));
+    }
+
+    @Override
+    public List<double[]> predict(List<double[]> x){
+        Layerrr inputLayer = layers.get(0);
+
+        Matrix input = new Matrix(x);
+        Matrix output = inputLayer.forwardPropagation(input);
+
+        return output.asVectors().stream().map(v -> v.asArray()).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Integer> predictClasses(List<double[]> x){
+        Layerrr inputLayer = layers.get(0);
+
+        Matrix input = new Matrix(x);
+        Matrix output = inputLayer.forwardPropagation(input);
+
+        return output.asVectors().stream().map(v -> v.argMaxIndex()).collect(Collectors.toList());
+    }
+
 
 }

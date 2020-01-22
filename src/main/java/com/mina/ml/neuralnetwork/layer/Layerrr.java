@@ -11,7 +11,6 @@ import java.io.Serializable;
 public abstract class Layerrr implements Serializable {
 
     private static final long serialVersionUID = 6529685098267757690L;
-
     private final static Logger logger = LoggerFactory.getLogger(Layerrr.class);
 
     protected Matrix input;
@@ -82,15 +81,12 @@ public abstract class Layerrr implements Serializable {
         return activationFunction;
     }
 
-    public double[][] getW() {
-        return weight.getMatrix();
+    public WeightMatrix getWeights() {
+        return weight;
     }
 
-    public double[][] getA() {
-        return A.getMatrix();
+    public void setWeights(WeightMatrix weight) {
+        this.weight = weight;
     }
 
-    public double[][] getZ() {
-        return Z.getMatrix();
-    }
 }

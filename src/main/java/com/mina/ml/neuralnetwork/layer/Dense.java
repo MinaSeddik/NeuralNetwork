@@ -11,12 +11,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Dense extends Layerrr {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Dense.class);
 
     protected Matrix deltaWeight;
@@ -185,7 +185,6 @@ public class Dense extends Layerrr {
         return new Matrix(deltas.get(0).getRowCount(), deltas.get(0).getColumnCount())
                 .addMatrices(deltas);
     }
-
 
 
     @Override

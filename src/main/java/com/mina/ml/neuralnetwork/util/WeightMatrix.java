@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 public class WeightMatrix extends Matrix {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(WeightMatrix.class);
 
     public WeightMatrix(int rows, int columns) {

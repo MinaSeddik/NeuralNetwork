@@ -17,7 +17,6 @@ import java.util.List;
 public abstract class LossFunction implements Serializable {
 
     private static final long serialVersionUID = 6529685098267757690L;
-
     private final static Logger logger = LoggerFactory.getLogger(LossFunction.class);
 
     public double reducedMeanError(double[][] labels, double[][] output) {

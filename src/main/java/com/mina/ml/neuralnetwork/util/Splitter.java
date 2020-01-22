@@ -2,12 +2,17 @@ package com.mina.ml.neuralnetwork.util;
 
 
 import org.javatuples.Quartet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class Splitter<T> {
+
+    private static final long serialVersionUID = 6529685098267757690L;
+    private final static Logger logger = LoggerFactory.getLogger(Splitter.class);
 
     private final List<T> x;
     private final List<T> y;

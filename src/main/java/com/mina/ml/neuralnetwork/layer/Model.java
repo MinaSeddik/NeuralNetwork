@@ -1,6 +1,7 @@
 package com.mina.ml.neuralnetwork.layer;
 
 import com.mina.ml.neuralnetwork.factory.Optimizer;
+import com.mina.ml.neuralnetwork.util.FilesUtil;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import java.util.function.Consumer;
 
 public abstract class Model implements Serializable {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Model.class);
 
     public abstract void summary(Consumer consumer);
@@ -21,40 +23,18 @@ public abstract class Model implements Serializable {
 
     public abstract Pair<Double, Double> evaluate(List<double[]> xTest, List<double[]> yTest);
 
+    public abstract void loadWeights(String modelFilePath);
+
+    public abstract List<double[]> predict(List<double[]> x);
+
+    public abstract List<Integer> predictClasses(List<double[]> x);
+
     public void save(String modelFilePath) {
-
-//        System.out.println("inside save " + modelFilePath);
-        try (FileOutputStream fos = new FileOutputStream(new File(modelFilePath))) {
-            ObjectOutputStream objectOut = new ObjectOutputStream(fos);
-            objectOut.writeObject(this);
-            objectOut.close();
-//            System.out.println("The Object  was successfully written to a file");
-
-        } catch (IOException ex) {
-            logger.error("{}, Exception: {}", ex.getMessage(), ex);
-            throw new RuntimeException(ex.getMessage());
-        }
+        FilesUtil.serializeData(modelFilePath, this);
     }
 
     public static Model load(String modelFilePath) {
-
-        Model model;
-//        System.out.println("inside load " + modelFilePath);
-        try (FileInputStream fis = new FileInputStream(new File(modelFilePath))) {
-            ObjectInputStream objectIn = new ObjectInputStream(fis);
-            model = (Model) objectIn.readObject();
-            objectIn.close();
-//            System.out.println("The Object  was successfully read from a file");
-
-        } catch (IOException | ClassNotFoundException ex) {
-            logger.error("{}, Exception: {}", ex.getMessage(), ex);
-            throw new RuntimeException(ex.getMessage());
-        }
-
-        return model;
+        return FilesUtil.deSerializeData(modelFilePath);
     }
-
-//    rounded_predictions = model.predict_classes(x_test);
-//    predictions = model.predict(x_test);
 
 }

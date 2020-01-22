@@ -12,7 +12,6 @@ import java.util.stream.IntStream;
 public abstract class CollectionParallelizer<T> implements Serializable {
 
     private static final long serialVersionUID = 6529685098267757690L;
-
     private final static Logger logger = LoggerFactory.getLogger(Matrix.class);
 
     private static final int NUM_OF_THREADS = Runtime.getRuntime().availableProcessors();

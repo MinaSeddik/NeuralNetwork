@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Sigmoid extends ActivationFunction {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Sigmoid.class);
 
     @Override

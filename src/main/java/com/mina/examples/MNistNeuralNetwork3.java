@@ -1,9 +1,9 @@
 package com.mina.examples;
 
 import com.mina.examples.mnist.MNistLoader;
-import com.mina.examples.mnist.MNistTraining;
 import com.mina.ml.neuralnetwork.factory.Optimizer;
 import com.mina.ml.neuralnetwork.layer.*;
+import com.mina.ml.neuralnetwork.util.Vector;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
 import org.javatuples.Tuple;
@@ -11,14 +11,17 @@ import org.javatuples.Unit;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
-public class MNistNeuralNetwork {
-
-    private static final int MNIST_IMAGE_SIZE = 28;
+public class MNistNeuralNetwork3 {
 
     private static final String MNIST_DATA_DIR = "mnist/models/";
     private static final String MNIST_MODEL_FILE = "model.bin";
+    private static final String MNIST_WEIGHT_FILE = "best-weights.bin";
+
+    public static final int NUMBER_OF_TEST_SAMPLES = 10;
 
     public static void main(String[] args) {
 
@@ -37,38 +40,32 @@ public class MNistNeuralNetwork {
         normalize(xTrain);
         normalize(xTest);
 
-        // Build Neural Network
-        Tuple inputShape = new Unit(MNIST_IMAGE_SIZE * MNIST_IMAGE_SIZE);
-        Model model = new Sequential(new Dense[]{
-                new Dense(64, inputShape, "relu"),
-                new Dense(64, "relu"),
-                new Dense(10, "softmax")
-        });
-
-        model.summary(line -> System.out.println(line));
-
-        double learningRate = 0.001;
-        Optimizer optimizer = new Optimizer(learningRate);
-        model.compile(optimizer, "categorical_crossentropy", "");
-
-        String filePath="weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
-        filePath = new File(dirPath, filePath).getAbsolutePath();
-        List<ModelCheckpoint> callbacksList = Arrays.asList(new ModelCheckpoint(filePath));
-
-        model.fit(xTrain, yTrain, 0.1f, true, 128, 300,
-                Verbosity.VERBOSE, callbacksList);
-
-        Pair<Double, Double> testStats = model.evaluate(xTest, yTest);
-        double test_acc = testStats.getValue1();
-        System.out.println(String.format("Test accuracy: %.2f%%", (test_acc * 100)));
-
-        // save the model
-        String modelFilePath = new File(dirPath, MNIST_MODEL_FILE).getAbsolutePath();
-        model.save(modelFilePath);
 
         // load the model
-        Model loadedModel = Model.load(modelFilePath);
-        loadedModel.summary(line -> System.out.println(line));
+        String modelFilePath = new File(dirPath, MNIST_MODEL_FILE).getAbsolutePath();
+        Model model = Model.load(modelFilePath);
+        model.summary(line -> System.out.println(line));
+
+        // load the best weight
+        model.loadWeights(MNIST_WEIGHT_FILE);
+
+        model.evaluate(xTest, yTest);
+
+        // get Random 10 samples from the test
+        Random random = new Random();
+        System.out.println(String.format("ID\tActual\tPredicted"));
+        for(int i=0;i<NUMBER_OF_TEST_SAMPLES;i++){
+            int r = random.nextInt(xTest.size());
+            double[] inputData = xTest.get(r);
+            double[] label = yTest.get(r);
+            Vector v = new Vector(label);
+
+            List<Integer> results = model.predictClasses(Arrays.asList(inputData));
+            System.out.println(String.format("%d\t%d\t%d",(i+1), v.argMaxIndex(), results.get(0)));
+        }
+
+
+
 
     }
 
@@ -82,4 +79,3 @@ public class MNistNeuralNetwork {
         }
     }
 }
-

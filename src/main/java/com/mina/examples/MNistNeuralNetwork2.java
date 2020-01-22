@@ -3,11 +3,13 @@ package com.mina.examples;
 import com.mina.examples.mnist.MNistLoader;
 import com.mina.examples.mnist.MNistTraining;
 import com.mina.ml.neuralnetwork.layer.Model;
+import com.mina.ml.neuralnetwork.layer.ModelCheckpoint;
 import com.mina.ml.neuralnetwork.layer.Verbosity;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public class MNistNeuralNetwork2 {
@@ -36,7 +38,11 @@ public class MNistNeuralNetwork2 {
 
         Model model = Model.load(modelFilePath);
         model.summary(line -> System.out.println(line));
-        model.fit(xTrain, yTrain, 0.1f, true, 128, 100, Verbosity.VERBOSE, null);
+
+        String filePath="weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
+        filePath = new File(dirPath, filePath).getAbsolutePath();
+        List<ModelCheckpoint> callbacksList = Arrays.asList(new ModelCheckpoint(filePath));
+        model.fit(xTrain, yTrain, 0.1f, true, 128, 300, Verbosity.VERBOSE, callbacksList);
 
         Pair<Double, Double> testStats = model.evaluate(xTest, yTest);
         double test_acc = testStats.getValue1();

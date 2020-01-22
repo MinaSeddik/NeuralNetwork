@@ -1,97 +1,97 @@
 package com.mina.ml.neuralnetwork.layer;
 
-import org.apache.commons.lang3.ObjectUtils;
+import com.mina.ml.neuralnetwork.util.FilesUtil;
+import com.mina.ml.neuralnetwork.util.WeightMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.io.File;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ModelCheckpoint {
 
+    private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(ModelCheckpoint.class);
 
-    private static final String VALIDATION_ACCURACY = "val_accuracy";  // default monitor
-    private static final String VALIDATION_LOSS = "val_loss";
-    private static final String TRAIN_ACCURACY = "train_accuracy";
-    private static final String TRAIN_LOSS = "train_loss";
+    public static final String VALIDATION_ACCURACY = "val_accuracy";  // default monitor
+    public static final String VALIDATION_LOSS = "val_loss";
+    public static final String TRAIN_ACCURACY = "train_accuracy";
+    public static final String TRAIN_LOSS = "train_loss";
 
     private static final String MAX_MODE = "max";   // default mode
     private static final String MIN_MODE = "min";
 
     private Double lastEpochValue = null;
 
-    private final String filePath;
+    private final String fileNamePattern;
     private final String monitor;
     private final Verbosity verbosity;
     private final boolean saveBestOnly;
     private final String mode;
 
-    private Map<String, Consumer<Double>> map = new HashMap<>();
-
-    public ModelCheckpoint(String filePath) {
-        this(filePath, VALIDATION_ACCURACY, Verbosity.NORMAL, true, MAX_MODE);
+    public ModelCheckpoint(String fileNamePattern) {
+        this(fileNamePattern, VALIDATION_ACCURACY, Verbosity.NORMAL, true, MAX_MODE);
     }
 
-    public ModelCheckpoint(String filePath, String monitor, Verbosity verbosity, boolean saveBestOnly, String mode) {
-        this.filePath = filePath;
-
+    public ModelCheckpoint(String fileNamePattern, String monitor, Verbosity verbosity, boolean saveBestOnly, String mode) {
+        this.fileNamePattern = fileNamePattern;
         this.monitor = monitor;
-        map.put("val_accuracy", value -> handle(value));
-        map.put("val_loss", value -> handle(value));
-        map.put("train_accuracy", value -> handle(value));
-        map.put("train_loss", value -> handle(value));
-
-
         this.verbosity = verbosity;
         this.saveBestOnly = saveBestOnly;
         this.mode = mode;
     }
 
-    private void handle(Double currentValue) {
-        if(lastEpochValue == null){
+    public void handle(Map<String, Object> params, List<? extends Layerrr> layers) {
+        double currentValue = (double) params.get(monitor);
+        if (lastEpochValue == null) {
             lastEpochValue = currentValue;
             return;
         }
 
-        switch (mode){
-            case MIN_MODE:
-                if(currentValue < lastEpochValue){
-                    // save the weights to the file specified
+        // save the model
+        if ((mode.equals(MIN_MODE) && currentValue < lastEpochValue) ||
+                (mode.equals(MAX_MODE) && currentValue > lastEpochValue)) {
+            // save the weights to the file specified
+            String file = getFileName(params);
+            Map<Integer, WeightMatrix> modelWeights = layers.stream()
+                    .collect(Collectors.toMap(Layerrr::getIndex, Layerrr::getWeights));
+            FilesUtil.serializeData(file, modelWeights);
 
-                    lastEpochValue = currentValue;
-                }
-                break;
-            case MAX_MODE:
-            default:
-               if(currentValue > lastEpochValue){
-                   // save the weights to the file specified
-
-                   lastEpochValue = currentValue;
-               }
+            System.out.println(String.format("Epoch %d: %s improved from %.4f to %.4f, saving model to %s",
+                    params.get("epoch"), monitor, lastEpochValue, currentValue, new File(file).getName()));
+            lastEpochValue = currentValue;
+        } else {
+            System.out.println(String.format("Epoch %02d: %s did not improve.", params.get("epoch"), monitor));
         }
 
     }
 
+    private String getFileName(Map<String, Object> params) {
+        String fileName = fileNamePattern;
 
-    public void handle(double trainLoss, double trainAcc, double valLoss, double valAcc) {
+        Pattern pattern = Pattern.compile("\\{([^{}]+)\\}");
+        Matcher matcher = pattern.matcher(fileNamePattern);
+        while (matcher.find()) {
+            String placeholder = matcher.group();
+            String temp = placeholder.replaceAll("\\{", "")
+                    .replaceAll("\\}", "");
 
-        switch (monitor) {
-            case VALIDATION_LOSS:
-                handle(valLoss);
-                break;
-            case TRAIN_ACCURACY:
-                handle(trainAcc);
-                break;
-            case TRAIN_LOSS:
-                handle(trainLoss);
-                break;
-            case VALIDATION_ACCURACY:
-            default:
-                handle(valAcc);
+            String placeholderValue;
+            if (temp.contains(":")) {
+                String placeholderName = temp.split(":")[0];
+                String placeholderFormat = "%" + temp.split(":")[1];
+                placeholderValue = String.format(placeholderFormat, params.get(placeholderName));
+            } else {
+                placeholderValue = params.get(temp).toString();
+            }
+            fileName = fileName.replace(placeholder, placeholderValue);
         }
-    }
 
+        return fileName;
+    }
 
 }
