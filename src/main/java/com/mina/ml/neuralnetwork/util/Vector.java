@@ -5,17 +5,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
-public class Vector extends CollectionParallelizer<double[]> {
+public class Vector extends Tensor {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Vector.class);
 
-//    private double[] vector;
+    //    private double[] vector;
+    private double[] collection;
 
     public Vector(int count) {
         collection = new double[count];
@@ -52,14 +51,14 @@ public class Vector extends CollectionParallelizer<double[]> {
         return collection;
     }
 
-    public double argMax(){
+    public double argMax() {
         return Arrays.stream(collection).max().getAsDouble();
     }
 
-    public int argMaxIndex(){
+    public int argMaxIndex() {
         int maxIndex = 0;
-        for(int i=1;i<collection.length;i++){
-            if(collection[i] > collection[maxIndex]){
+        for (int i = 1; i < collection.length; i++) {
+            if (collection[i] > collection[maxIndex]) {
                 maxIndex = i;
             }
         }

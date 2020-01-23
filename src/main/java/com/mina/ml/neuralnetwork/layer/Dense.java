@@ -3,6 +3,7 @@ package com.mina.ml.neuralnetwork.layer;
 import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
 import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.MatrixLogger;
+import com.mina.ml.neuralnetwork.util.Tensor;
 import com.mina.ml.neuralnetwork.util.WeightMatrix;
 import org.javatuples.Tuple;
 import org.javatuples.Unit;
@@ -19,8 +20,16 @@ public class Dense extends Layerrr {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Dense.class);
 
-    protected Matrix deltaWeight;
-    private String activationFunctionStr;
+    private WeightMatrix weight;
+    private Matrix deltaWeight;
+
+    private Matrix input;
+    private Matrix A;
+    private Matrix Z;
+
+    protected int numOfInputs;
+    protected int numOfOutputs;
+    protected String activationFunctionStr;
 
     public Dense(int units, Tuple inputShape, String activation) {
         this(units, activation);
@@ -42,6 +51,7 @@ public class Dense extends Layerrr {
         activationFunctionStr = activation;
     }
 
+    @Override
     public void buildupLayer() {
 
         // init the weight matrix
@@ -65,6 +75,13 @@ public class Dense extends Layerrr {
 
     private Matrix removeBias(Matrix matrix) {
         return matrix.removeFirstColumn();
+    }
+
+    // I need to revisit it
+    @Override
+    public void setInputParameters(int paramCount) {
+        /* Add 1 for Bias */
+        numOfInputs = paramCount + 1;
     }
 
     @Override
@@ -186,6 +203,13 @@ public class Dense extends Layerrr {
                 .addMatrices(deltas);
     }
 
+    public Tensor getWeights() {
+        return weight;
+    }
+
+    public void setWeights(Tensor weight) {
+        this.weight = (WeightMatrix) weight;
+    }
 
     @Override
     public String getName() {
@@ -195,6 +219,11 @@ public class Dense extends Layerrr {
     @Override
     public int getNumberOfParameter() {
         return numOfInputs * numOfOutputs;
+    }
+
+    @Override
+    public int getOutputParameters() {
+        return numOfOutputs;
     }
 
 }

@@ -25,7 +25,7 @@ public class Sequential extends Model {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Sequential.class);
 
-    private List<Dense> layers = new ArrayList<>();
+    private List<Layerrr> layers = new ArrayList<>();
     private LossFunction lossFunction;
 
     private Optimizer optimizer;
@@ -33,20 +33,20 @@ public class Sequential extends Model {
     public static final String ACCURACY_METRICS = "accuracy";
     private String metrics;
 
-    public Sequential(Dense[] array) {
+    public Sequential(Layerrr[] array) {
         Arrays.stream(array).forEach(e -> add(e));
     }
 
-    public void add(Dense layer) {
-        Dense prev = layers.size() > 0 ? layers.get(layers.size() - 1) : null;
+    public void add(Layerrr layer) {
+        Layerrr prev = layers.size() > 0 ? layers.get(layers.size() - 1) : null;
         int lastIndex = layers.size() > 0 ? layers.get(layers.size() - 1).getIndex() + 1 : 1;
 
         // link up this layer
         if (null != prev) {
-            prev.setNextDense(layer);
+            prev.setNext(layer);
             layer.setInputParameters(prev.getOutputParameters());
         }
-        layer.setPreviousDense(prev);
+        layer.setPrevious(prev);
         layer.setIndex(lastIndex);
 
         layers.add(layer);
@@ -62,7 +62,7 @@ public class Sequential extends Model {
         consumer.accept("Layer (type)\t\t\t\t\tOutput Shape\t\t\tParam #");
         consumer.accept("=================================================================");
         layers.stream().forEach(layer -> {
-            String layerInfo = String.format("%s (%s)\t\t\t\t\t(None, %s)\t\t\t\t%d", layer.getName(), layer.getType(),
+            String layerInfo = String.format("%s (%s)\t\t\t\t\t(None, %s)\t\t\t\t%d", layer.getName(), layer.getLayerType(),
                     layer.getOutputParameters(), layer.getNumberOfParameter());
             totalParameters.addAndGet(layer.getNumberOfParameter());
             trainableParameters.addAndGet(layer.getNumberOfParameter());

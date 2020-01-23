@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public abstract class CollectionParallelizer<T> implements Serializable {
+public abstract class TensorParallelizer implements Serializable {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Matrix.class);
@@ -26,11 +26,9 @@ public abstract class CollectionParallelizer<T> implements Serializable {
         }
     });
 
-    protected T collection;
-
-    public void parallelizeOperation(CollectionConsumer collectionConsumer) {
+    public void parallelizeOperation(TensorConsumer tensorConsumer) {
         if (getSize() < NUM_OF_THREADS) {
-            collectionConsumer.accept(0, getSize());
+            tensorConsumer.accept(0, getSize());
             return;
         }
 
@@ -41,7 +39,7 @@ public abstract class CollectionParallelizer<T> implements Serializable {
                     int startIndex = i * batchSize;
                     int endIndex = i == NUM_OF_THREADS ? getSize() : i * batchSize + batchSize;
 
-                    Future<?> future = executor.submit(() -> collectionConsumer.accept(startIndex, endIndex));
+                    Future<?> future = executor.submit(() -> tensorConsumer.accept(startIndex, endIndex));
 
                     return future;
                 }).collect(Collectors.toList());

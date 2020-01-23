@@ -1,7 +1,9 @@
 package com.mina.ml.neuralnetwork.layer;
 
-import com.mina.ml.neuralnetwork.util.Matrix;
+import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
+import com.mina.ml.neuralnetwork.util.*;
 import org.javatuples.Pair;
+import org.javatuples.Quartet;
 import org.javatuples.Tuple;
 import org.javatuples.Unit;
 import org.slf4j.Logger;
@@ -13,18 +15,33 @@ public class Conv2D extends Layerrr {
     private final static Logger logger = LoggerFactory.getLogger(Conv2D.class);
 
     private Pair<Integer, Integer> kernelSize;
-    private String activationFunctionStr;
+
+    private D4WeightMatrix weight;
+    private D4WeightMatrix deltaWeight;
+
+    private Vector bias;
+
+    private D4WeightMatrix input;
+    private D4WeightMatrix A;
+    private D4WeightMatrix Z;
+
+    protected int numOfInputs;
+    protected int numOfOutputs;
+    protected String activationFunctionStr;
+
+    // will be constant for now!
+    private int padding = 0;
+    private int strides = 1;
 
     public Conv2D(int filters, Tuple inputShape, String activation, Pair<Integer, Integer> kernelSize) {
         this(filters, activation, kernelSize);
 
         switch (inputShape.getClass().getName()) {
-            case "org.javatuples.Unit":
-                numOfInputs = ((Unit<Integer>) inputShape).getValue0();
-                numOfInputs += 1; // Add 1 for Bias
+            case "org.javatuples.Quartet":
+                numOfInputs = ((Quartet<Integer, Integer, Integer, Integer>) inputShape).getValue0();
                 break;
             default:
-                RuntimeException ex = new RuntimeException("UnSupported Input Shape");
+                RuntimeException ex = new RuntimeException("UnSupported Input Shape for Conv2D Layer");
                 logger.error("{}, Exception: {}", ex.getMessage(), ex);
                 throw ex;
         }
@@ -34,7 +51,28 @@ public class Conv2D extends Layerrr {
         numOfOutputs = filters;
         activationFunctionStr = activation;
         this.kernelSize = kernelSize;
+
+        bias = new Vector(filters);
     }
+
+    @Override
+    public void buildupLayer() {
+
+        // init the weight matrix
+//        weight = new D4WeightMatrix(numOfInputs, numOfOutputs);
+//        weight.initializeRandom(-1.0d, 1.0d);
+//
+//        deltaWeight = new Matrix(numOfInputs, numOfOutputs);
+
+        ActivationFunctionFactory activationFunctionFactory = new ActivationFunctionFactory();
+        try {
+            activationFunction = activationFunctionFactory.createActivationFunction(activationFunctionStr);
+        } catch (Exception ex) {
+            logger.error("{}: {}", ex.getClass(), ex);
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+
 
     @Override
     public String getName() {
@@ -64,5 +102,27 @@ public class Conv2D extends Layerrr {
     @Override
     public void updateWeight(double learningRate) {
 
+    }
+
+    @Override
+    public Tensor getWeights() {
+        return null;
+    }
+
+    @Override
+    public void setWeights(Tensor weight) {
+
+    }
+
+    // I have to revisit it
+    @Override
+    public void setInputParameters(int paramCount) {
+
+    }
+
+    // I have to revisit it
+    @Override
+    public int getOutputParameters() {
+        return 0;
     }
 }

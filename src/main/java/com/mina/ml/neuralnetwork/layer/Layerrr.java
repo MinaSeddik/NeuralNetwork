@@ -1,7 +1,9 @@
 package com.mina.ml.neuralnetwork.layer;
 
 import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
+import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
 import com.mina.ml.neuralnetwork.util.Matrix;
+import com.mina.ml.neuralnetwork.util.Tensor;
 import com.mina.ml.neuralnetwork.util.WeightMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,23 +15,18 @@ public abstract class Layerrr implements Serializable {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Layerrr.class);
 
-    protected Matrix input;
-    protected Matrix A;
-    protected Matrix Z;
+
 
     protected int layerIndex;
 
     protected Layerrr previousDense;
     protected Layerrr nextDense;
 
-    protected int numOfInputs;
-    protected int numOfOutputs;
-
-    protected WeightMatrix weight;
-
+    @Deprecated
     protected NetworkLayerType networkLayerType = NetworkLayerType.OUTPUT;
 
     protected ActivationFunction activationFunction;
+
 
     public void setIndex(int index) {
         layerIndex = index;
@@ -43,27 +40,20 @@ public abstract class Layerrr implements Serializable {
         return previousDense;
     }
 
-    public void setPreviousDense(Layerrr layer) {
+    public void setPrevious(Layerrr layer) {
         previousDense = layer;
     }
 
-    public void setNextDense(Layerrr layer) {
+    public void setNext(Layerrr layer) {
         nextDense = layer;
         networkLayerType = NetworkLayerType.HIDDEN;
     }
 
-    public String getType() {
+    public String getLayerType() {
         return this.getClass().getSimpleName();
     }
 
-    public int getOutputParameters() {
-        return numOfOutputs;
-    }
-
-    public void setInputParameters(int paramCount) {
-        /* Add 1 for Bias */
-        numOfInputs = paramCount + 1;
-    }
+    public abstract void buildupLayer();
 
     public abstract String getName();
 
@@ -77,16 +67,18 @@ public abstract class Layerrr implements Serializable {
 
     public abstract void updateWeight(double learningRate);
 
+    public abstract Tensor getWeights();
+
+    public abstract void setWeights(Tensor weight);
+
+    // I should re-visit it
+    public abstract void setInputParameters(int paramCount);
+
+    // I should re-visit it
+    public abstract int getOutputParameters();
+
     public ActivationFunction getActivationFunction() {
         return activationFunction;
-    }
-
-    public WeightMatrix getWeights() {
-        return weight;
-    }
-
-    public void setWeights(WeightMatrix weight) {
-        this.weight = weight;
     }
 
 }

@@ -11,10 +11,12 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class Matrix extends CollectionParallelizer<double[][]> {
+public class Matrix extends Tensor {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Matrix.class);
+
+    protected double[][] collection;
 
     public Matrix(int rows, int columns) {
         collection = new double[rows][columns];

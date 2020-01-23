@@ -1,6 +1,6 @@
 package com.mina.ml.neuralnetwork.util;
 
 @FunctionalInterface
-public interface CollectionConsumer {
+public interface TensorConsumer {
     void accept(int startIndex, int endIndex);
 }
