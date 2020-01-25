@@ -18,7 +18,8 @@ public class MNistNeuralNetwork {
     private static final int MNIST_IMAGE_SIZE = 28;
 
     private static final String MNIST_DATA_DIR = "mnist/models/";
-    private static final String MNIST_MODEL_FILE = "model.bin";
+    private static final String MNIST_MODEL_FILE = "nn_model.bin";
+    private static String fileName="nn_weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
 
     public static void main(String[] args) {
 
@@ -38,7 +39,7 @@ public class MNistNeuralNetwork {
         normalize(xTest);
 
         // Build Neural Network
-        Tuple inputShape = new Unit(MNIST_IMAGE_SIZE * MNIST_IMAGE_SIZE);
+        Tuple inputShape = new Pair<>( 0, MNIST_IMAGE_SIZE * MNIST_IMAGE_SIZE);
         Model model = new Sequential(new Dense[]{
                 new Dense(64, inputShape, "relu"),
                 new Dense(64, "relu"),
@@ -51,8 +52,7 @@ public class MNistNeuralNetwork {
         Optimizer optimizer = new Optimizer(learningRate);
         model.compile(optimizer, "categorical_crossentropy", "");
 
-        String filePath="weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
-        filePath = new File(dirPath, filePath).getAbsolutePath();
+        String filePath = new File(dirPath, fileName).getAbsolutePath();
         List<ModelCheckpoint> callbacksList = Arrays.asList(new ModelCheckpoint(filePath));
 
         model.fit(xTrain, yTrain, 0.1f, true, 128, 300,
@@ -62,13 +62,13 @@ public class MNistNeuralNetwork {
         double test_acc = testStats.getValue1();
         System.out.println(String.format("Test accuracy: %.2f%%", (test_acc * 100)));
 
-        // save the model
-        String modelFilePath = new File(dirPath, MNIST_MODEL_FILE).getAbsolutePath();
-        model.save(modelFilePath);
-
-        // load the model
-        Model loadedModel = Model.load(modelFilePath);
-        loadedModel.summary(line -> System.out.println(line));
+//        // save the model
+//        String modelFilePath = new File(dirPath, MNIST_MODEL_FILE).getAbsolutePath();
+//        model.save(modelFilePath);
+//
+//        // load the model
+//        Model loadedModel = Model.load(modelFilePath);
+//        loadedModel.summary(line -> System.out.println(line));
 
     }
 

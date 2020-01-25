@@ -1,11 +1,13 @@
 package com.mina.ml.neuralnetwork.layer;
 
 import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
-import com.mina.ml.neuralnetwork.util.*;
+import com.mina.ml.neuralnetwork.util.D4WeightMatrix;
+import com.mina.ml.neuralnetwork.util.Matrix;
+import com.mina.ml.neuralnetwork.util.Tensor;
+import com.mina.ml.neuralnetwork.util.Vector;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
 import org.javatuples.Tuple;
-import org.javatuples.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +16,9 @@ public class Conv2D extends Layerrr {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Conv2D.class);
 
+    private Quartet<Integer, Integer, Integer, Integer> inputShape;
     private Pair<Integer, Integer> kernelSize;
+    private int filters;
 
     private D4WeightMatrix weight;
     private D4WeightMatrix deltaWeight;
@@ -25,8 +29,8 @@ public class Conv2D extends Layerrr {
     private D4WeightMatrix A;
     private D4WeightMatrix Z;
 
-    protected int numOfInputs;
-    protected int numOfOutputs;
+    //    protected int numOfInputs;
+//    protected int numOfOutputs;
     protected String activationFunctionStr;
 
     // will be constant for now!
@@ -38,7 +42,7 @@ public class Conv2D extends Layerrr {
 
         switch (inputShape.getClass().getName()) {
             case "org.javatuples.Quartet":
-                numOfInputs = ((Quartet<Integer, Integer, Integer, Integer>) inputShape).getValue0();
+                this.inputShape = (Quartet<Integer, Integer, Integer, Integer>) inputShape;
                 break;
             default:
                 RuntimeException ex = new RuntimeException("UnSupported Input Shape for Conv2D Layer");
@@ -48,7 +52,7 @@ public class Conv2D extends Layerrr {
     }
 
     public Conv2D(int filters, String activation, Pair<Integer, Integer> kernelSize) {
-        numOfOutputs = filters;
+        this.filters = filters;
         activationFunctionStr = activation;
         this.kernelSize = kernelSize;
 
@@ -59,10 +63,13 @@ public class Conv2D extends Layerrr {
     public void buildupLayer() {
 
         // init the weight matrix
-//        weight = new D4WeightMatrix(numOfInputs, numOfOutputs);
-//        weight.initializeRandom(-1.0d, 1.0d);
+        int channels = inputShape.getValue1();
+        int height = kernelSize.getValue0();
+        int width = kernelSize.getValue1();
+        weight = new D4WeightMatrix(filters, channels, height, width);
+        weight.initializeRandom(-1.0d, 1.0d);
 //
-//        deltaWeight = new Matrix(numOfInputs, numOfOutputs);
+        deltaWeight = new D4WeightMatrix(filters, channels, height, width);
 
         ActivationFunctionFactory activationFunctionFactory = new ActivationFunctionFactory();
         try {
@@ -81,21 +88,25 @@ public class Conv2D extends Layerrr {
 
     @Override
     public int getNumberOfParameter() {
-        return 0;
+        int channels = inputShape.getValue1();
+        int height = kernelSize.getValue0();
+        int width = kernelSize.getValue1();
+        int biasSize = bias.size();
+        return (filters * channels * height * width ) + biasSize;
     }
 
     @Override
-    public Matrix forwardPropagation(Matrix input) {
+    public Tensor forwardPropagation(Tensor input) {
         return null;
     }
 
     @Override
-    public void printForwardPropagation(Matrix input) {
+    public void printForwardPropagation(Tensor input) {
 
     }
 
     @Override
-    public void backPropagation(Matrix costPrime) {
+    public void backPropagation(Tensor costPrime) {
 
     }
 
@@ -114,15 +125,27 @@ public class Conv2D extends Layerrr {
 
     }
 
-    // I have to revisit it
     @Override
-    public void setInputParameters(int paramCount) {
-
+    public void setInputShape(Tuple inputShape) {
+        this.inputShape = (Quartet<Integer, Integer, Integer, Integer>)inputShape;
     }
 
-    // I have to revisit it
     @Override
-    public int getOutputParameters() {
-        return 0;
+    public Tuple getOutputShape() {
+        return new Quartet<>(inputShape.getValue0(), filters, getOutputHeight(), getOutputWidth());
     }
+
+
+    private int getOutputHeight() {
+        int originalHeight = inputShape.getValue2();
+        int kernalHeight = kernelSize.getValue0();
+        return 1 + ((originalHeight + 2*padding - kernalHeight) / strides);
+    }
+
+    private int getOutputWidth() {
+        int originalWidth = inputShape.getValue3();
+        int kernalWidth = kernelSize.getValue1();
+        return 1 + ((originalWidth + 2*padding - kernalWidth) / strides);
+    }
+
 }

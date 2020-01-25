@@ -33,6 +33,44 @@ public class MNistLoader {
 
     public Quartet<List<double[]>, List<double[]>, List<double[]>, List<double[]>> loadMNistDataSet() {
 
+        Quartet<List<int[][]>, int[], List<int[][]>, int[]> dataset = downloadAndFetchDataset();
+
+        List<int[][]> _trainingImages = dataset.getValue0();
+        int[] _trainingLabels = dataset.getValue1();
+        List<int[][]> _testImages = dataset.getValue2();
+        int[] _testLabels = dataset.getValue3();
+
+        List<double[]> x_train = _trainingImages.stream().map(matrix -> convert2DataArray(matrix)).collect(Collectors.toList());
+        List<double[]> x_test = _testImages.stream().map(matrix -> convert2DataArray(matrix)).collect(Collectors.toList());
+
+        OneHotEncoder encoder = new OneHotEncoder(NUM_OF_CLASSES);
+        List<double[]> y_train = Arrays.stream(_trainingLabels).boxed().map(l -> encoder.transform(l)).collect(Collectors.toList());
+        List<double[]> y_test = Arrays.stream(_testLabels).boxed().map(l -> encoder.transform(l)).collect(Collectors.toList());
+
+        return new Quartet<>(x_train, y_train, x_test, y_test);
+    }
+
+    public Quartet<List<double[][][]>, List<double[]>, List<double[][][]>, List<double[]>> loadMNistDataSet2() {
+
+        Quartet<List<int[][]>, int[], List<int[][]>, int[]> dataset = downloadAndFetchDataset();
+
+        List<int[][]> _trainingImages = dataset.getValue0();
+        int[] _trainingLabels = dataset.getValue1();
+        List<int[][]> _testImages = dataset.getValue2();
+        int[] _testLabels = dataset.getValue3();
+
+        List<double[][][]> x_train = _trainingImages.stream().map(matrix -> convert2ChannelImageMatrix(matrix)).collect(Collectors.toList());
+        List<double[][][]> x_test = _testImages.stream().map(matrix -> convert2ChannelImageMatrix(matrix)).collect(Collectors.toList());
+
+        OneHotEncoder encoder = new OneHotEncoder(NUM_OF_CLASSES);
+        List<double[]> y_train = Arrays.stream(_trainingLabels).boxed().map(l -> encoder.transform(l)).collect(Collectors.toList());
+        List<double[]> y_test = Arrays.stream(_testLabels).boxed().map(l -> encoder.transform(l)).collect(Collectors.toList());
+
+        return new Quartet<>(x_train, y_train, x_test, y_test);
+    }
+
+    private Quartet<List<int[][]>, int[], List<int[][]>, int[]> downloadAndFetchDataset(){
+
         if (!mNistDataSetExists()) {
             try {
                 downloadMNistDataSetGunZip(BASE_URL + TRAINING_SET_IMAGES + ".gz", TRAINING_SET_IMAGES);
@@ -65,15 +103,9 @@ public class MNistLoader {
         List<int[][]> _testImages = MNistReader.getImages(imagesTestFile);
         int[] _testLabels = MNistReader.getLabels(labelsTestFile);
 
-        List<double[]> x_train = _trainingImages.stream().map(matrix -> convert2DataArray(matrix)).collect(Collectors.toList());
-        List<double[]> x_test = _testImages.stream().map(matrix -> convert2DataArray(matrix)).collect(Collectors.toList());
-
-        OneHotEncoder encoder = new OneHotEncoder(NUM_OF_CLASSES);
-        List<double[]> y_train = Arrays.stream(_trainingLabels).boxed().map(l -> encoder.transform(l)).collect(Collectors.toList());
-        List<double[]> y_test = Arrays.stream(_testLabels).boxed().map(l -> encoder.transform(l)).collect(Collectors.toList());
-
-        return new Quartet<>(x_train, y_train, x_test, y_test);
+        return new Quartet<>(_trainingImages, _trainingLabels, _testImages, _testLabels);
     }
+
 
     private boolean mNistDataSetExists() {
         return MNistTraining.class.getClassLoader().getResource(MNIST_DATA_DIR + TRAINING_SET_IMAGES) != null &&
@@ -102,7 +134,7 @@ public class MNistLoader {
         }
     }
 
-    private static double[] convert2DataArray(int[][] matrix) {
+    private double[] convert2DataArray(int[][] matrix) {
         double[] dataImage = new double[MNIST_IMAGE_HEIGHT * MNIST_IMAGE_WIDTH];
 
         int d = 0;
@@ -112,5 +144,17 @@ public class MNistLoader {
             }
         }
         return dataImage;
+    }
+
+    private double[][][] convert2ChannelImageMatrix(int[][] matrix) {
+        double[][][] dataImage = new double[1][MNIST_IMAGE_HEIGHT][MNIST_IMAGE_WIDTH];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                dataImage[0][i][j] = matrix[i][j];
+            }
+        }
+
+        return dataImage;
+
     }
 }

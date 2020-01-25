@@ -9,21 +9,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class Splitter<T> {
+public class Splitter {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Splitter.class);
 
-    private final List<T> x;
-    private final List<T> y;
+    private final List<? extends Object> x;
+    private final List<? extends Object> y;
 
     private final boolean shuffle;
 
-    public Splitter(List<T> x, List<T> y) {
+    public Splitter(List<? extends Object> x, List<? extends Object> y) {
         this(x, y, false);
     }
 
-    public Splitter(List<T> x, List<T> y, boolean shuffle) {
+    public Splitter(List<? extends Object> x, List<? extends Object> y, boolean shuffle) {
         assert x.size() == y.size();
 
         this.x = x;
@@ -31,14 +31,14 @@ public class Splitter<T> {
         this.shuffle = shuffle;
     }
 
-    public Quartet<List<T>, List<T>, List<T>, List<T>> split(float ratio){
+    public Quartet<List<? extends Object>, List<? extends Object>, List<? extends Object>, List<? extends Object>> split(float ratio){
         int splitStartIndex = (int) (x.size() * (1f - ratio));
 
-        List<T> x1 = x.subList(0, splitStartIndex);
-        List<T> y1 = y.subList(0, splitStartIndex);
+        List<? extends Object> x1 = x.subList(0, splitStartIndex);
+        List<? extends Object> y1 = y.subList(0, splitStartIndex);
 
-        List<T> x2 = x.subList(splitStartIndex, x.size());
-        List<T> y2 = y.subList(splitStartIndex, y.size());
+        List<? extends Object> x2 = x.subList(splitStartIndex, x.size());
+        List<? extends Object> y2 = y.subList(splitStartIndex, y.size());
 
         return new Quartet<>(x1, y1, x2, y2);
     }

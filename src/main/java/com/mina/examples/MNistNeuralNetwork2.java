@@ -15,7 +15,8 @@ import java.util.List;
 public class MNistNeuralNetwork2 {
 
     private static final String MNIST_DATA_DIR = "mnist/models";
-    private static final String MNIST_MODEL_FILE = "model.bin";
+    private static final String MNIST_MODEL_FILE = "nn_model.bin";
+    private static String fileName="nn_weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
 
     public static void main(String[] args) {
 
@@ -39,8 +40,8 @@ public class MNistNeuralNetwork2 {
         Model model = Model.load(modelFilePath);
         model.summary(line -> System.out.println(line));
 
-        String filePath="weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
-        filePath = new File(dirPath, filePath).getAbsolutePath();
+
+        String filePath = new File(dirPath, fileName).getAbsolutePath();
         List<ModelCheckpoint> callbacksList = Arrays.asList(new ModelCheckpoint(filePath));
         model.fit(xTrain, yTrain, 0.1f, true, 128, 300, Verbosity.VERBOSE, callbacksList);
 

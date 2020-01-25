@@ -5,6 +5,8 @@ import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.MatrixLogger;
 import com.mina.ml.neuralnetwork.util.Tensor;
 import com.mina.ml.neuralnetwork.util.WeightMatrix;
+import org.javatuples.Pair;
+import org.javatuples.Quartet;
 import org.javatuples.Tuple;
 import org.javatuples.Unit;
 import org.slf4j.Logger;
@@ -20,6 +22,9 @@ public class Dense extends Layerrr {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Dense.class);
 
+    private Pair<Integer, Integer> inputShape;
+    private int units; // number of neurons
+
     private WeightMatrix weight;
     private Matrix deltaWeight;
 
@@ -27,17 +32,16 @@ public class Dense extends Layerrr {
     private Matrix A;
     private Matrix Z;
 
-    protected int numOfInputs;
-    protected int numOfOutputs;
-    protected String activationFunctionStr;
+//    private int numOfInputs;
+//    private int numOfOutputs;
+    private String activationFunctionStr;
 
     public Dense(int units, Tuple inputShape, String activation) {
         this(units, activation);
 
         switch (inputShape.getClass().getName()) {
-            case "org.javatuples.Unit":
-                numOfInputs = ((Unit<Integer>) inputShape).getValue0();
-                numOfInputs += 1; // Add 1 for Bias
+            case "org.javatuples.Pair":
+                this.inputShape = (Pair<Integer, Integer>)inputShape;
                 break;
             default:
                 RuntimeException ex = new RuntimeException("UnSupported Input Shape");
@@ -47,7 +51,7 @@ public class Dense extends Layerrr {
     }
 
     public Dense(int units, String activation) {
-        numOfOutputs = units;
+        this.units = units;
         activationFunctionStr = activation;
     }
 
@@ -55,10 +59,10 @@ public class Dense extends Layerrr {
     public void buildupLayer() {
 
         // init the weight matrix
-        weight = new WeightMatrix(numOfInputs, numOfOutputs);
+        weight = new WeightMatrix(inputShape.getValue1() + 1 /* 1 for Bias */, units);
         weight.initializeRandom(-1.0d, 1.0d);
 
-        deltaWeight = new Matrix(numOfInputs, numOfOutputs);
+        deltaWeight = new Matrix(inputShape.getValue1() + 1 /* 1 for Bias */, units);
 
         ActivationFunctionFactory activationFunctionFactory = new ActivationFunctionFactory();
         try {
@@ -69,25 +73,18 @@ public class Dense extends Layerrr {
         }
     }
 
-    private Matrix addBias(Matrix matrix) {
-        return matrix.addColumn(1d);
+    private Matrix addBias(Tensor matrix) {
+        return ((Matrix)matrix).addColumn(1d);
     }
 
     private Matrix removeBias(Matrix matrix) {
         return matrix.removeFirstColumn();
     }
 
-    // I need to revisit it
     @Override
-    public void setInputParameters(int paramCount) {
-        /* Add 1 for Bias */
-        numOfInputs = paramCount + 1;
-    }
+    public void printForwardPropagation(Tensor input) {
 
-    @Override
-    public void printForwardPropagation(Matrix input) {
-
-        Matrix tempInput = input.clone();
+        Matrix tempInput = ((Matrix)input).clone();
         Matrix tempWeight = weight.clone();
 
         System.out.println(String.format("Layer %s", getName()));
@@ -119,7 +116,7 @@ public class Dense extends Layerrr {
     }
 
     @Override
-    public Matrix forwardPropagation(Matrix in) {
+    public Tensor forwardPropagation(Tensor in) {
         input = addBias(in);
         A = input.dot(weight);
         Z = activationFunction.activate(A);
@@ -128,7 +125,7 @@ public class Dense extends Layerrr {
     }
 
     @Override
-    public void backPropagation(Matrix costPrime) {
+    public void backPropagation(Tensor costPrime) {
 //        /* output */
 //        calculateDeltaWeight(costOutputPrime);
 //        prepareErrorCostThenBackPropagate(costOutputPrime);
@@ -144,7 +141,7 @@ public class Dense extends Layerrr {
 
         //----------------------------------
         //dE/dZ
-        Matrix dE_dZ = costPrime;
+        Matrix dE_dZ = (Matrix) costPrime;
 //        System.out.println("dE/dZ shape = " + dE_dZ.shape());
 
         // dZ/dA
@@ -218,12 +215,17 @@ public class Dense extends Layerrr {
 
     @Override
     public int getNumberOfParameter() {
-        return numOfInputs * numOfOutputs;
+        return (inputShape.getValue1() + 1 )* units;
     }
 
     @Override
-    public int getOutputParameters() {
-        return numOfOutputs;
+    public void setInputShape(Tuple inputShape) {
+        this.inputShape = (Pair<Integer, Integer>)inputShape;
+    }
+
+    @Override
+    public Tuple getOutputShape() {
+        return new Pair<>(inputShape.getValue0(), units);
     }
 
 }

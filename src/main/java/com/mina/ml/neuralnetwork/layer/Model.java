@@ -15,13 +15,15 @@ public abstract class Model implements Serializable {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Model.class);
 
+    public abstract void add(Layerrr layer);
+
     public abstract void summary(Consumer consumer);
 
     public abstract void compile(Optimizer optimizer, String loss, String metrics);
 
-    public abstract void fit(List<double[]> xTrain, List<double[]> yTrain, float validationSplit, boolean shuffle, int batchSize, int epochs, Verbosity verbosity, List<ModelCheckpoint> callbacks);
+    public abstract void fit(List<Object> xTrain, List<double[]> yTrain, float validationSplit, boolean shuffle, int batchSize, int epochs, Verbosity verbosity, List<ModelCheckpoint> callbacks);
 
-    public abstract Pair<Double, Double> evaluate(List<double[]> xTest, List<double[]> yTest);
+    public abstract Pair<Double, Double> evaluate(List<? extends Object> xTest, List<? extends Object> yTest);
 
     public abstract void loadWeights(String modelFilePath);
 

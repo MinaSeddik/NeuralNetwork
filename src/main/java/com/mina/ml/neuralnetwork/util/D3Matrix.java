@@ -3,7 +3,9 @@ package com.mina.ml.neuralnetwork.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class D3Matrix extends Tensor{
+import java.util.List;
+
+public class D3Matrix extends Tensor {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Matrix.class);
@@ -16,6 +18,11 @@ public class D3Matrix extends Tensor{
 
     public D3Matrix(double[][][] d3Matrix) {
         collection = d3Matrix;
+    }
+
+    public D3Matrix(List<double[][]> list) {
+        collection = new double[list.size()][list.get(0).length][list.get(0)[0].length];
+        parallelizeOperation((start, end) -> list2Array(list, start, end));
     }
 
     public int getDepthCount() {
@@ -35,5 +42,13 @@ public class D3Matrix extends Tensor{
         return getDepthCount();
     }
 
-
+    private void list2Array(List<double[][]> list, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    collection[i][j][k] = list.get(i)[j][k];
+                }
+            }
+        }
+    }
 }

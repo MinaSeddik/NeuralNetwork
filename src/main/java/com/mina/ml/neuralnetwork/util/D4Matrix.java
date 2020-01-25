@@ -3,6 +3,8 @@ package com.mina.ml.neuralnetwork.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 public class D4Matrix extends Tensor {
 
     private static final long serialVersionUID = 6529685098267757690L;
@@ -16,6 +18,11 @@ public class D4Matrix extends Tensor {
 
     public D4Matrix(double[][][][] d4Matrix) {
         collection = d4Matrix;
+    }
+
+    public D4Matrix(List<double[][][]> list) {
+        collection = new double[list.size()][list.get(0).length][list.get(0)[0].length][list.get(0)[0][0].length];
+        parallelizeOperation((start, end) -> list2Array(list, start, end));
     }
 
     public int getDimensionCount() {
@@ -37,6 +44,18 @@ public class D4Matrix extends Tensor {
     @Override
     public int getSize() {
         return getDepthCount();
+    }
+
+    private void list2Array(List<double[][][]> list, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        collection[i][j][k][l] = list.get(i)[j][k][l];
+                    }
+                }
+            }
+        }
     }
 
 }

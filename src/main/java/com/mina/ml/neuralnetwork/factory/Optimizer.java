@@ -4,6 +4,7 @@ import com.mina.ml.neuralnetwork.layer.Layerrr;
 import com.mina.ml.neuralnetwork.layer.Verbosity;
 import com.mina.ml.neuralnetwork.lossfunction.LossFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
+import com.mina.ml.neuralnetwork.util.Tensor;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +34,11 @@ public class Optimizer implements Serializable {
         this.verbosity = verbosity;
     }
 
-    public Pair<Double, Double> optimize(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Matrix x, Matrix y) {
+    public Pair<Double, Double> optimize(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Tensor input, Tensor labels) {
 
-        Matrix yPrime = inputLayer.forwardPropagation(x);
+        Matrix yPrime = (Matrix) inputLayer.forwardPropagation(input);
 
+        Matrix y = (Matrix) labels;
         double loss = lossFunction.meanErrorCost(y, yPrime);
         double acc = lossFunction.calculateAccuracy(y, yPrime);
 

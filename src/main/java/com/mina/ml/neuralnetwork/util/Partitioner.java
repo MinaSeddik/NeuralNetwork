@@ -6,18 +6,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class Partitioner<T> {
+public class Partitioner {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Partitioner.class);
 
-    private List<T> x;
-    private List<T> y;
+    private List<? extends Object> x;
+    private List<? extends Object> y;
     private int batchSize;
 
     private int startBatchIndex = 0;
 
-    public Partitioner(List<T> x, List<T> y, int batchSize) {
+    public Partitioner(List<? extends Object> x, List<? extends Object> y, int batchSize) {
         assert x.size() == y.size();
 
         this.x = x;
@@ -29,10 +29,10 @@ public class Partitioner<T> {
         return startBatchIndex < x.size();
     }
 
-    public Pair<List<T>, List<T>> getNext() {
+    public Pair<List<? extends Object>, List<? extends Object>> getNext() {
         int endIndex = Math.min(startBatchIndex + batchSize, x.size()) ;
-        List<T> xList = x.subList(startBatchIndex, endIndex);
-        List<T> yList = y.subList(startBatchIndex, endIndex);
+        List<? extends Object> xList = x.subList(startBatchIndex, endIndex);
+        List<? extends Object> yList = y.subList(startBatchIndex, endIndex);
         startBatchIndex = endIndex;
 
         return new Pair<>(xList, yList);

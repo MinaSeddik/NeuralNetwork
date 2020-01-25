@@ -18,8 +18,8 @@ import java.util.Random;
 public class MNistNeuralNetwork3 {
 
     private static final String MNIST_DATA_DIR = "mnist/models/";
-    private static final String MNIST_MODEL_FILE = "model.bin";
-    private static final String MNIST_WEIGHT_FILE = "best-weights.bin";
+    private static final String MNIST_MODEL_FILE = "nn_model.bin";
+    private static final String MNIST_WEIGHT_FILE = "nn_best-weights.bin";
 
     public static final int NUMBER_OF_TEST_SAMPLES = 10;
 

@@ -5,6 +5,7 @@ import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
 import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.Tensor;
 import com.mina.ml.neuralnetwork.util.WeightMatrix;
+import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,11 +60,11 @@ public abstract class Layerrr implements Serializable {
 
     public abstract int getNumberOfParameter();
 
-    public abstract Matrix forwardPropagation(Matrix input);
+    public abstract Tensor forwardPropagation(Tensor input);
 
-    public abstract void printForwardPropagation(Matrix input);
+    public abstract void printForwardPropagation(Tensor input);
 
-    public abstract void backPropagation(Matrix costPrime);
+    public abstract void backPropagation(Tensor costPrime);
 
     public abstract void updateWeight(double learningRate);
 
@@ -71,11 +72,9 @@ public abstract class Layerrr implements Serializable {
 
     public abstract void setWeights(Tensor weight);
 
-    // I should re-visit it
-    public abstract void setInputParameters(int paramCount);
+    public abstract void setInputShape(Tuple inputShape);
 
-    // I should re-visit it
-    public abstract int getOutputParameters();
+    public abstract Tuple getOutputShape();
 
     public ActivationFunction getActivationFunction() {
         return activationFunction;
