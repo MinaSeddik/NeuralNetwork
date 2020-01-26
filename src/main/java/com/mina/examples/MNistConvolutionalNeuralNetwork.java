@@ -44,14 +44,14 @@ public class MNistConvolutionalNeuralNetwork {
         Pair<Integer, Integer> poolsize = new Pair<>(3, 3);
 
         Model model = new Sequential();
-        model.add(new Conv2D(32, inputShape, "relu", kernal));
-        model.add(new MaxPooling2D(poolsize));
-        model.add(new Conv2D(64,"relu", kernal));
-        model.add(new MaxPooling2D(poolsize));
+        model.add(new Conv2D(64, inputShape, "relu", kernal));
+//        model.add(new MaxPooling2D(poolsize));
+        model.add(new Conv2D(32,"relu", kernal));
+//        model.add(new MaxPooling2D(poolsize));
+        model.add(new MaxPooling2D(new Pair<>(2, 2)));
         model.add(new Flatten());
         model.add(new Dense(128 ,"relu"));
-        model.add(new Dense(10 ,"sigmoid"));
-
+        model.add(new Dense(10 ,"softmax"));
 
         model.summary(line -> System.out.println(line));
 
@@ -59,11 +59,14 @@ public class MNistConvolutionalNeuralNetwork {
         Optimizer optimizer = new Optimizer(learningRate);
         model.compile(optimizer, "categorical_crossentropy", "");
 
-        String filePath = new File(dirPath, fileName).getAbsolutePath();
-        List<ModelCheckpoint> callbacksList = Arrays.asList(new ModelCheckpoint(filePath));
+//        String filePath = new File(dirPath, fileName).getAbsolutePath();
+//        List<ModelCheckpoint> callbacksList = Arrays.asList(new ModelCheckpoint(filePath));
+        List<ModelCheckpoint> callbacksList = null;
 
         model.fit(xTrain, yTrain, 0.1f, true, 128, 300,
                 Verbosity.VERBOSE, callbacksList);
+
+        System.exit(0);
 
         Pair<Double, Double> testStats = model.evaluate(xTest, yTest);
         double test_acc = testStats.getValue1();

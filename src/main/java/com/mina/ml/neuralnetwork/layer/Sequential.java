@@ -118,7 +118,7 @@ public class Sequential extends Model {
     }
 
     @Override
-    public void fit(List<Object> x, List<double[]> y, float validationSplit, boolean shuffle, int batchSize,
+    public void fit(List<? extends Object> x, List<double[]> y, float validationSplit, boolean shuffle, int batchSize,
                     int epochs, Verbosity verbosity, List<ModelCheckpoint> callbacks) {
 
         Stopwatch stopwatch = Stopwatch.createStarted();

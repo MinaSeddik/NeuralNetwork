@@ -21,7 +21,7 @@ public abstract class Model implements Serializable {
 
     public abstract void compile(Optimizer optimizer, String loss, String metrics);
 
-    public abstract void fit(List<Object> xTrain, List<double[]> yTrain, float validationSplit, boolean shuffle, int batchSize, int epochs, Verbosity verbosity, List<ModelCheckpoint> callbacks);
+    public abstract void fit(List<? extends Object> xTrain, List<double[]> yTrain, float validationSplit, boolean shuffle, int batchSize, int epochs, Verbosity verbosity, List<ModelCheckpoint> callbacks);
 
     public abstract Pair<Double, Double> evaluate(List<? extends Object> xTest, List<? extends Object> yTest);
 

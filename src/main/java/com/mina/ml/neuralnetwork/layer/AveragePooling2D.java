@@ -7,7 +7,7 @@ import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MaxPooling2D extends Layerrr {
+public class AveragePooling2D extends Layerrr {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(MaxPooling2D.class);
@@ -15,20 +15,19 @@ public class MaxPooling2D extends Layerrr {
     private Quartet<Integer, Integer, Integer, Integer> inputShape;
     private Pair<Integer, Integer> poolSize;
 
-    public MaxPooling2D(Pair<Integer, Integer> poolSize) {
+    public AveragePooling2D(Pair<Integer, Integer> poolSize) {
         this.poolSize = poolSize;
     }
 
+
     @Override
     public void buildupLayer() {
-
-        // do nothing for now
 
     }
 
     @Override
     public String getName() {
-        return "max_pooling2d_" + layerIndex;
+        return "average_pooling2d_" + layerIndex;
     }
 
     @Override
@@ -68,11 +67,11 @@ public class MaxPooling2D extends Layerrr {
 
     @Override
     public void setInputShape(Tuple inputShape) {
-        this.inputShape = (Quartet<Integer, Integer, Integer, Integer>)inputShape;
+
     }
 
     @Override
     public Tuple getOutputShape() {
-        return new Quartet<>(inputShape.getValue0(), inputShape.getValue1(), inputShape.getValue2()/2, inputShape.getValue3()/2);
+        return null;
     }
 }

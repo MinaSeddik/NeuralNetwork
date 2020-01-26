@@ -1,10 +1,7 @@
 package com.mina.ml.neuralnetwork.layer;
 
 import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
-import com.mina.ml.neuralnetwork.util.D4WeightMatrix;
-import com.mina.ml.neuralnetwork.util.Matrix;
-import com.mina.ml.neuralnetwork.util.Tensor;
-import com.mina.ml.neuralnetwork.util.Vector;
+import com.mina.ml.neuralnetwork.util.*;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
 import org.javatuples.Tuple;
@@ -29,9 +26,7 @@ public class Conv2D extends Layerrr {
     private D4WeightMatrix A;
     private D4WeightMatrix Z;
 
-    //    protected int numOfInputs;
-//    protected int numOfOutputs;
-    protected String activationFunctionStr;
+    private String activationFunctionStr;
 
     // will be constant for now!
     private int padding = 0;
@@ -68,7 +63,7 @@ public class Conv2D extends Layerrr {
         int width = kernelSize.getValue1();
         weight = new D4WeightMatrix(filters, channels, height, width);
         weight.initializeRandom(-1.0d, 1.0d);
-//
+
         deltaWeight = new D4WeightMatrix(filters, channels, height, width);
 
         ActivationFunctionFactory activationFunctionFactory = new ActivationFunctionFactory();
@@ -79,7 +74,6 @@ public class Conv2D extends Layerrr {
             throw new RuntimeException(ex.getMessage());
         }
     }
-
 
     @Override
     public String getName() {
@@ -97,6 +91,14 @@ public class Conv2D extends Layerrr {
 
     @Override
     public Tensor forwardPropagation(Tensor input) {
+
+        D4Matrix test = (D4Matrix)input;
+        System.out.println("forwardPropagation" + test.shape());
+
+//        D4Matrix mat = imagePatches(input, kernelSize);
+
+        System.exit(0);
+
         return null;
     }
 

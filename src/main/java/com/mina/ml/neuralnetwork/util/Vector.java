@@ -77,4 +77,16 @@ public class Vector extends Tensor {
     public int getSize() {
         return collection.length;
     }
+
+    @Override
+    public String shape() {
+        return String.format("(%d)", collection.length);
+    }
+
+    @Override
+    public boolean sameShape(Tensor tensor) {
+        Vector vec = (Vector) tensor;
+        return getSize() == vec.getSize();
+    }
+
 }

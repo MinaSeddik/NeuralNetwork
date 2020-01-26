@@ -42,6 +42,19 @@ public class D3Matrix extends Tensor {
         return getDepthCount();
     }
 
+    @Override
+    public String shape() {
+        return String.format("(%d, %d, %d)", collection.length, collection[0].length,
+                collection[0][0].length);
+    }
+
+    @Override
+    public boolean sameShape(Tensor tensor) {
+        D3Matrix mat = (D3Matrix) tensor;
+        return getDepthCount() == mat.getDepthCount() &&
+                getRowCount() == mat.getRowCount() && getColumnCount() == mat.getColumnCount();
+    }
+
     private void list2Array(List<double[][]> list, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[i].length; j++) {

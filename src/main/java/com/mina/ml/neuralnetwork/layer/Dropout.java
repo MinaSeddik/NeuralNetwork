@@ -1,34 +1,33 @@
 package com.mina.ml.neuralnetwork.layer;
 
+
+// https://wiseodd.github.io/techblog/2016/06/25/dropout/
+
 import com.mina.ml.neuralnetwork.util.Tensor;
-import org.javatuples.Pair;
-import org.javatuples.Quartet;
 import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MaxPooling2D extends Layerrr {
+public class Dropout extends Layerrr {
 
     private static final long serialVersionUID = 6529685098267757690L;
-    private final static Logger logger = LoggerFactory.getLogger(MaxPooling2D.class);
+    private final static Logger logger = LoggerFactory.getLogger(Dropout.class);
 
-    private Quartet<Integer, Integer, Integer, Integer> inputShape;
-    private Pair<Integer, Integer> poolSize;
+    private Tuple inputShape;
+    private float dropoutProbability;
 
-    public MaxPooling2D(Pair<Integer, Integer> poolSize) {
-        this.poolSize = poolSize;
+    public Dropout(float dropoutProbability) {
+        this.dropoutProbability = dropoutProbability;
     }
 
     @Override
     public void buildupLayer() {
 
-        // do nothing for now
-
     }
 
     @Override
     public String getName() {
-        return "max_pooling2d_" + layerIndex;
+        return null;
     }
 
     @Override
@@ -53,7 +52,7 @@ public class MaxPooling2D extends Layerrr {
 
     @Override
     public void updateWeight(double learningRate) {
-
+        // Non-Applicable for this Layer
     }
 
     @Override
@@ -63,16 +62,16 @@ public class MaxPooling2D extends Layerrr {
 
     @Override
     public void setWeights(Tensor weight) {
-
+        // Non-Applicable for this Layer
     }
 
     @Override
     public void setInputShape(Tuple inputShape) {
-        this.inputShape = (Quartet<Integer, Integer, Integer, Integer>)inputShape;
+        this.inputShape = inputShape;
     }
 
     @Override
     public Tuple getOutputShape() {
-        return new Quartet<>(inputShape.getValue0(), inputShape.getValue1(), inputShape.getValue2()/2, inputShape.getValue3()/2);
+        return inputShape;
     }
 }

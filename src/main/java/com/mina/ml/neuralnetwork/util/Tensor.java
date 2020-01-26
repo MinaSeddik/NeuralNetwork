@@ -12,6 +12,10 @@ public abstract class Tensor extends TensorParallelizer {
 
     public abstract int getSize();
 
+    public abstract String shape();
+
+    public abstract boolean sameShape(Tensor tensor);
+
     public static Tensor getTensor(List<? extends Object> data) {
 
         if (data.get(0) instanceof double[]) {

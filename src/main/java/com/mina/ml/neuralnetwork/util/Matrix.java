@@ -268,11 +268,14 @@ public class Matrix extends Tensor {
         }
     }
 
+    @Override
     public String shape() {
         return String.format("(%d, %d)", collection.length, collection[0].length);
     }
 
-    public boolean sameShape(Matrix mat) {
+    @Override
+    public boolean sameShape(Tensor tensor) {
+        Matrix mat = (Matrix) tensor;
         return getRowCount() == mat.getRowCount() && getColumnCount() == mat.getColumnCount();
     }
 
