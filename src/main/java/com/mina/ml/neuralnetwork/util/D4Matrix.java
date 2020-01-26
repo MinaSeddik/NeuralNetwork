@@ -26,46 +26,81 @@ public class D4Matrix extends Tensor {
         parallelizeOperation((start, end) -> list2Array(list, start, end));
     }
 
-    public D4Matrix matrixPatches(D4Matrix matrix, Pair<Integer, Integer> window) {
-        int size = matrix.getDimensionCount();
-        int channels = matrix.getDepthCount();
-        int matrixHeight = matrix.getRowCount();
-        int matrixWidth = matrix.getColumnCount();
+    public D3Matrix matrixPatches(Pair<Integer, Integer> window) {
+        int size = getDimensionCount();
+        int channels = getDepthCount();
+        int matrixHeight = getRowCount();
+        int matrixWidth = getColumnCount();
         int windowHeight = window.getValue0();
         int windowWidth = window.getValue1();
 
         int numOfPatches = (matrixHeight - windowHeight + 1) * (matrixWidth - windowWidth + 1);
         int windowSize = windowHeight * windowWidth;
 
-        double[][][][] result = new double[size][numOfPatches][channels][windowSize];
+        double[][][] result = new double[size][][];
         parallelizeOperation((start, end) -> matrixPatches(result, windowHeight, start, end));
 
 
-        return new D4Matrix(result);
+        return new D3Matrix(result);
     }
 
-    private void matrixPatches(double[][][][] result, int window, int start, int end) {
+    public D3Matrix matrixPatches_test(Pair<Integer, Integer> window) {
+        int size = getDimensionCount();
+        int channels = getDepthCount();
+        int matrixHeight = getRowCount();
+        int matrixWidth = getColumnCount();
+        int windowHeight = window.getValue0();
+        int windowWidth = window.getValue1();
+
+        int numOfPatches = (matrixHeight - windowHeight + 1) * (matrixWidth - windowWidth + 1);
+        int windowSize = windowHeight * windowWidth;
+
+        double[][][] result = new double[size][][];
+
+        System.out.println(size);
+        System.out.println(numOfPatches);
+        System.out.println(channels);
+        System.out.println(windowSize);
+        System.out.println();
+        matrixPatches(result, windowHeight, 0, size);
+
+
+        return new D3Matrix(result);
+    }
+
+    private void matrixPatches(double[][][] result, int window, int start, int end) {
         int patch = 0;
         for (int i = start; i < end; i++) {
-            for (int j = 0; j < collection[i].length; j++) {
-                double[][] patches = getSubMatrices(collection[i][j], window);
-                for (int x = 0; x < patches.length; ++x) {
-                    result[i][patch++][j] = patches[x];
-                }
-            }
+            result[i] = getSubMatrices(collection[i], window);
         }
     }
 
-    private double[][] getSubMatrices(double[][] matrix, int window) {
+    private double[][] getSubMatrices(double[][][] matrix, int window) {
+        int channels = matrix.length;
+        int windowHeight = matrix[0].length - window + 1;
+        int windowWidth = matrix[0][0].length - window + 1;
+        double[][] windowData = new double[channels * windowHeight * windowWidth][];
+        int index = 0;
+        for (int i = 0; i <= matrix[0].length - window; i++) {
+            for (int j = 0; j <= matrix[0][0].length - window; j++) {
+                windowData[index++] = buildWindow(matrix, channels, i, j, window);
+            }
+        }
+        return windowData;
+    }
 
-//        https://algorithms.tutorialhorizon.com/sliding-window-algorithm-track-the-maximum-of-each-subarray-of-size-k/
-//        for(int i=0;i<matrix.length;i++){
-//            for(int j=0;j<matrix[0].length;j++){
-//
-//            }
-//        }
+    private double[] buildWindow(double[][][] matrix, int channels, int startRow, int startColumn, int window) {
+        double[] windowData = new double[channels * window * window];
+        int index = 0;
+        for (int c = 0; c < channels; c++) {
+            for (int i = startRow; i < startRow + window; i++) {
+                for (int j = startColumn; j < startColumn + window; j++) {
+                    windowData[index++] = matrix[c][i][j];
+                }
+            }
+        }
 
-        return null;
+        return windowData;
     }
 
     public int getDimensionCount() {
