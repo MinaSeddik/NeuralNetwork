@@ -27,6 +27,35 @@ public class D4WeightMatrix extends D4Matrix {
         return this;
     }
 
+    public Matrix reshape2D(){
+        int size = getDimensionCount();
+        double[][] result = new double[size][];
+        parallelizeOperation((start, end) -> reshape2D(result, start, end));
+
+        return new Matrix(result);
+    }
+
+    private void reshape2D(double[][] result, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            result[i] = flat(collection[i]);
+        }
+    }
+
+    private double[] flat(double[][][] data) {
+        int n = data.length * data[0].length * data[0][0].length;
+        double[] flatMatrix = new double[n];
+        int index = 0;
+        for (int i = 0; i < data.length; i++) {
+            for (int j = 0; j < data[i].length; j++) {
+                for (int k = 0; k < data[i][j].length; k++) {
+                    flatMatrix[index++] = data[i][j][k];
+                }
+            }
+        }
+
+        return flatMatrix;
+    }
+
     private void initializeRandom(Random random, double minRange, double maxRange, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[i].length; j++) {

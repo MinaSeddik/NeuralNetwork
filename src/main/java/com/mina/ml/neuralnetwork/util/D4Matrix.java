@@ -28,18 +28,10 @@ public class D4Matrix extends Tensor {
 
     public D3Matrix matrixPatches(Pair<Integer, Integer> window) {
         int size = getDimensionCount();
-        int channels = getDepthCount();
-        int matrixHeight = getRowCount();
-        int matrixWidth = getColumnCount();
         int windowHeight = window.getValue0();
-        int windowWidth = window.getValue1();
-
-        int numOfPatches = (matrixHeight - windowHeight + 1) * (matrixWidth - windowWidth + 1);
-        int windowSize = windowHeight * windowWidth;
 
         double[][][] result = new double[size][][];
         parallelizeOperation((start, end) -> matrixPatches(result, windowHeight, start, end));
-
 
         return new D3Matrix(result);
     }
@@ -69,7 +61,6 @@ public class D4Matrix extends Tensor {
     }
 
     private void matrixPatches(double[][][] result, int window, int start, int end) {
-        int patch = 0;
         for (int i = start; i < end; i++) {
             result[i] = getSubMatrices(collection[i], window);
         }
@@ -81,9 +72,11 @@ public class D4Matrix extends Tensor {
         int windowWidth = matrix[0][0].length - window + 1;
         double[][] windowData = new double[channels * windowHeight * windowWidth][];
         int index = 0;
-        for (int i = 0; i <= matrix[0].length - window; i++) {
-            for (int j = 0; j <= matrix[0][0].length - window; j++) {
-                windowData[index++] = buildWindow(matrix, channels, i, j, window);
+        for (int c = 0; c < channels; c++) {
+            for (int i = 0; i <= matrix[0].length - window; i++) {
+                for (int j = 0; j <= matrix[0][0].length - window; j++) {
+                    windowData[index++] = buildWindow(matrix, channels, i, j, window);
+                }
             }
         }
         return windowData;

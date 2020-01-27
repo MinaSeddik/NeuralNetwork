@@ -60,7 +60,7 @@ public abstract class Layerrr implements Serializable {
 
     public abstract int getNumberOfParameter();
 
-    public abstract Tensor forwardPropagation(Tensor input);
+    public abstract Tensor forwardPropagation(Tensor inputTensor);
 
     public abstract void printForwardPropagation(Tensor input);
 

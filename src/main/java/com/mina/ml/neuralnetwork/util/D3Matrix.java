@@ -37,6 +37,10 @@ public class D3Matrix extends Tensor {
         return collection[0][0].length;
     }
 
+    public Matrix get(int index){
+        return new Matrix(collection[index]);
+    }
+
     @Override
     public int getSize() {
         return getDepthCount();

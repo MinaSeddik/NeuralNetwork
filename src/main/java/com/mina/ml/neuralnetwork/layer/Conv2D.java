@@ -22,9 +22,9 @@ public class Conv2D extends Layerrr {
 
     private Vector bias;
 
-    private D4WeightMatrix input;
-    private D4WeightMatrix A;
-    private D4WeightMatrix Z;
+    private D4Matrix input;
+    private D4Matrix A;
+    private D4Matrix Z;
 
     private String activationFunctionStr;
 
@@ -86,16 +86,41 @@ public class Conv2D extends Layerrr {
         int height = kernelSize.getValue0();
         int width = kernelSize.getValue1();
         int biasSize = bias.size();
-        return (filters * channels * height * width ) + biasSize;
+        return (filters * channels * height * width) + biasSize;
     }
 
+//    @Override
+//    public Tensor forwardPropagation(Tensor inputTensor) {
+//
+//        input = (D4Matrix) inputTensor;
+//        System.out.println("forwardPropagation:: input shape" + input.shape());
+//
+//        D3Matrix patches = input.matrixPatches(kernelSize);
+//        System.out.println("forwardPropagation:: patches shape" + patches.shape());
+//
+//        System.out.println("forwardPropagation:: weight shape" + weight.shape());
+//
+//        Matrix K = weight.reshape2D();
+//        System.out.println("forwardPropagation:: K shape" + K.shape());
+//
+//        for (int image = 0; image < patches.getSize(); image++) {
+//            Matrix P = patches.get(image);
+//            P = P.transpose();
+//            Matrix KP = K.dot(P);
+//            System.out.println("forwardPropagation:: KP shape" + KP.shape());
+//        }
+//
+//        System.exit(0);
+//
+//        return null;
+//    }
+
     @Override
-    public Tensor forwardPropagation(Tensor input) {
+    public Tensor forwardPropagation(Tensor inputTensor) {
 
-        D4Matrix test = (D4Matrix)input;
-        System.out.println("forwardPropagation" + test.shape());
+        D4Matrix X = (D4Matrix) inputTensor;
+        
 
-//        D4Matrix mat = imagePatches(input, kernelSize);
 
         System.exit(0);
 
@@ -129,7 +154,7 @@ public class Conv2D extends Layerrr {
 
     @Override
     public void setInputShape(Tuple inputShape) {
-        this.inputShape = (Quartet<Integer, Integer, Integer, Integer>)inputShape;
+        this.inputShape = (Quartet<Integer, Integer, Integer, Integer>) inputShape;
     }
 
     @Override
@@ -141,13 +166,13 @@ public class Conv2D extends Layerrr {
     private int getOutputHeight() {
         int originalHeight = inputShape.getValue2();
         int kernalHeight = kernelSize.getValue0();
-        return 1 + ((originalHeight + 2*padding - kernalHeight) / strides);
+        return 1 + ((originalHeight + 2 * padding - kernalHeight) / strides);
     }
 
     private int getOutputWidth() {
         int originalWidth = inputShape.getValue3();
         int kernalWidth = kernelSize.getValue1();
-        return 1 + ((originalWidth + 2*padding - kernalWidth) / strides);
+        return 1 + ((originalWidth + 2 * padding - kernalWidth) / strides);
     }
 
 }
