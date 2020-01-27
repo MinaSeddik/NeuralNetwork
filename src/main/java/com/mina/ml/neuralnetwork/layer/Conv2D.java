@@ -8,6 +8,7 @@ import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
 public class Conv2D extends Layerrr {
 
     private static final long serialVersionUID = 6529685098267757690L;
@@ -118,6 +119,7 @@ public class Conv2D extends Layerrr {
     @Override
     public Tensor forwardPropagation(Tensor inputTensor) {
 
+        // https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
         D4Matrix X = (D4Matrix) inputTensor;
         
 
