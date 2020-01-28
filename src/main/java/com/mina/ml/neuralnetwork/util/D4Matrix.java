@@ -26,6 +26,30 @@ public class D4Matrix extends Tensor {
         parallelizeOperation((start, end) -> list2Array(list, start, end));
     }
 
+    public Matrix flat() {
+        int n = collection.length;
+        int m = collection[0].length * collection[0][0].length * collection[0][0][0].length;
+        double[][] result = new double[n][m];
+//        parallelizeOperation((start, end) -> flat(result, start, end));
+
+        flat(result, 0, n);
+        return new Matrix(result);
+    }
+
+    private void flat(double[][] result, int start, int end) {
+        int index = 0;
+        for (int i = start; i < end; i++) {
+            index = 0;
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        result[i][index++] = collection[i][j][k][l];
+                    }
+                }
+            }
+        }
+    }
+
     public D3Matrix matrixPatches(Pair<Integer, Integer> window) {
         int size = getDimensionCount();
         int windowHeight = window.getValue0();
@@ -130,6 +154,18 @@ public class D4Matrix extends Tensor {
                 getRowCount() == mat.getRowCount() && getColumnCount() == mat.getColumnCount();
     }
 
+    public double[][][][] getMatrix() {
+        return collection;
+    }
+
+    public Matrix getSubMatrix(int dim, int depth) {
+        return new Matrix(collection[dim][depth]).clone();
+    }
+
+    public void setMatrix(int dim, int depth, Matrix mat) {
+        collection[dim][depth] = mat.getMatrix();
+    }
+
     private void list2Array(List<double[][][]> list, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[i].length; j++) {
@@ -142,4 +178,7 @@ public class D4Matrix extends Tensor {
         }
     }
 
+    public D3Matrix getDimension(int dim) {
+        return new D3Matrix(collection[dim]);
+    }
 }

@@ -45,10 +45,8 @@ public class MNistConvolutionalNeuralNetwork {
 
         Model model = new Sequential();
         model.add(new Conv2D(64, inputShape, "relu", kernal));
-//        model.add(new MaxPooling2D(poolsize));
         model.add(new Conv2D(32,"relu", kernal));
-//        model.add(new MaxPooling2D(poolsize));
-        model.add(new MaxPooling2D(new Pair<>(2, 2)));
+        model.add(new MaxPooling2D(poolsize));
         model.add(new Flatten());
         model.add(new Dense(128 ,"relu"));
         model.add(new Dense(10 ,"softmax"));

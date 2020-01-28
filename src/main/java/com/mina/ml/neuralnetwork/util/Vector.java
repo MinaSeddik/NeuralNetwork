@@ -89,4 +89,9 @@ public class Vector extends Tensor {
         return getSize() == vec.getSize();
     }
 
+    public void divide(double val) {
+        for (int i = 0; i < collection.length; i++) {
+            collection[i]/= val;
+        }
+    }
 }

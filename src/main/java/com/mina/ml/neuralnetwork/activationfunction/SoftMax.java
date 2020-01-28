@@ -36,14 +36,32 @@ public class SoftMax extends ActivationFunction {
     /* new implementation */
     @Override
     public Matrix activate(Matrix matrix) {
-        List<Vector> list = matrix.asVectors();
+
+        // Normalize the matrix
+        // Reference: https://stats.stackexchange.com/questions/304758/softmax-overflow
+        Matrix normalizedMatrix = normalize(matrix);
+
+        List<Vector> list = normalizedMatrix.asVectors();
         BigDecimal[] sumPerRow = new BigDecimal[list.size()];
         IntStream.range(0, list.size())
                 .parallel()
                 .forEach(i -> sumPerRow[i] = sum(list.get(i)));
 
         Function function = p -> calcSoftMax((Pair<Double, BigDecimal>) p);
-        return matrix.apply(sumPerRow, function);
+        return normalizedMatrix.apply(sumPerRow, function);
+    }
+
+    private Matrix normalize(Matrix matrix) {
+
+        List<Vector> list = matrix.asVectors();
+
+        double[] maximums = new double[list.size()];
+        IntStream.range(0, list.size())
+                .parallel()
+                .forEach(i -> maximums[i] = list.get(i).argMax());
+
+        // Normalize the matrix
+        return matrix.subtract(new Vector(maximums));
     }
 
     private double calcSoftMax(Pair<Double, BigDecimal> pair){

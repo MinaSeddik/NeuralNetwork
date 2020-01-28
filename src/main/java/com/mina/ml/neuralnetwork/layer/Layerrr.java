@@ -1,10 +1,7 @@
 package com.mina.ml.neuralnetwork.layer;
 
 import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
-import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
-import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.Tensor;
-import com.mina.ml.neuralnetwork.util.WeightMatrix;
 import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +17,8 @@ public abstract class Layerrr implements Serializable {
 
     protected int layerIndex;
 
-    protected Layerrr previousDense;
-    protected Layerrr nextDense;
+    protected Layerrr prevLayer;
+    protected Layerrr nextLayer;
 
     @Deprecated
     protected NetworkLayerType networkLayerType = NetworkLayerType.OUTPUT;
@@ -38,15 +35,15 @@ public abstract class Layerrr implements Serializable {
     }
 
     public Layerrr getPrev() {
-        return previousDense;
+        return prevLayer;
     }
 
     public void setPrevious(Layerrr layer) {
-        previousDense = layer;
+        prevLayer = layer;
     }
 
     public void setNext(Layerrr layer) {
-        nextDense = layer;
+        nextLayer = layer;
         networkLayerType = NetworkLayerType.HIDDEN;
     }
 

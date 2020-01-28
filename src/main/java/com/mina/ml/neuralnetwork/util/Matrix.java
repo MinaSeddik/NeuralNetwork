@@ -71,6 +71,14 @@ public class Matrix extends Tensor {
         return new Matrix(result);
     }
 
+    public Matrix subtract(Vector vector) {
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> subtract(result, vector.asArray(), start, end));
+
+        return new Matrix(result);
+    }
+
+
     public Matrix addColumn(double value) {
         double[][] result = new double[collection.length][collection[0].length + 1];
         parallelizeOperation((start, end) -> addColumn(result, value, start, end));
@@ -207,6 +215,14 @@ public class Matrix extends Tensor {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
                 result[i][j] = collection[i][j] / value;
+            }
+        }
+    }
+
+    private void subtract(double[][] result, double[] values, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[0].length; j++) {
+                result[i][j] = collection[i][j] - values[i];
             }
         }
     }

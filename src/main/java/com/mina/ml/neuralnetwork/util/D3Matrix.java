@@ -41,6 +41,31 @@ public class D3Matrix extends Tensor {
         return new Matrix(collection[index]);
     }
 
+    public double[][][] getMatrix() {
+        return collection;
+    }
+
+    public Matrix flat(){
+        int n = collection.length;
+        int m = collection[0].length * collection[0][0].length;
+        double[][] result = new double[n][m];
+        parallelizeOperation((start, end) -> flat(result, start, end));
+
+        return new Matrix(result);
+    }
+
+    private void flat(double[][] result, int start, int end) {
+        int index = 0;
+        for (int i = start; i < end; i++) {
+            index = 0;
+            for(int j=0;j<collection[i].length;j++){
+                for(int k=0;k<collection[i][j].length;k++){
+                    result[i][index++] = collection[i][j][k];
+                }
+            }
+        }
+    }
+
     @Override
     public int getSize() {
         return getDepthCount();

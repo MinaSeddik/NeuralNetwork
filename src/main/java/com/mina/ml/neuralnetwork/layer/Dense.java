@@ -6,9 +6,7 @@ import com.mina.ml.neuralnetwork.util.MatrixLogger;
 import com.mina.ml.neuralnetwork.util.Tensor;
 import com.mina.ml.neuralnetwork.util.WeightMatrix;
 import org.javatuples.Pair;
-import org.javatuples.Quartet;
 import org.javatuples.Tuple;
-import org.javatuples.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,8 +107,8 @@ public class Dense extends Layerrr {
 
         System.out.println("---------------------------------------");
 
-        if (!Objects.isNull(nextDense)) {
-            nextDense.printForwardPropagation(Z);
+        if (!Objects.isNull(nextLayer)) {
+            nextLayer.printForwardPropagation(Z);
         }
 
     }
@@ -121,7 +119,7 @@ public class Dense extends Layerrr {
         A = input.dot(weight);
         Z = activationFunction.activate(A);
 
-        return Objects.isNull(nextDense) ? Z : nextDense.forwardPropagation(Z);
+        return Objects.isNull(nextLayer) ? Z : nextLayer.forwardPropagation(Z);
     }
 
     @Override
@@ -181,8 +179,8 @@ public class Dense extends Layerrr {
 //        System.out.println("dE_dA shape = " + dE_dA.shape());
 //        System.out.println("cost shape = " + cost.shape());
 
-        if (!Objects.isNull(previousDense)) {
-            previousDense.backPropagation(cost);
+        if (!Objects.isNull(prevLayer)) {
+            prevLayer.backPropagation(cost);
         }
 
     }
@@ -190,8 +188,8 @@ public class Dense extends Layerrr {
     @Override
     public void updateWeight(double learningRate) {
         weight.updateWeights(deltaWeight, learningRate);
-        if (!Objects.isNull(nextDense)) {
-            nextDense.updateWeight(learningRate);
+        if (!Objects.isNull(nextLayer)) {
+            nextLayer.updateWeight(learningRate);
         }
     }
 

@@ -8,6 +8,8 @@ import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 // https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
 public class Conv2D extends Layerrr {
 
@@ -90,43 +92,30 @@ public class Conv2D extends Layerrr {
         return (filters * channels * height * width) + biasSize;
     }
 
-//    @Override
-//    public Tensor forwardPropagation(Tensor inputTensor) {
-//
-//        input = (D4Matrix) inputTensor;
-//        System.out.println("forwardPropagation:: input shape" + input.shape());
-//
-//        D3Matrix patches = input.matrixPatches(kernelSize);
-//        System.out.println("forwardPropagation:: patches shape" + patches.shape());
-//
-//        System.out.println("forwardPropagation:: weight shape" + weight.shape());
-//
-//        Matrix K = weight.reshape2D();
-//        System.out.println("forwardPropagation:: K shape" + K.shape());
-//
-//        for (int image = 0; image < patches.getSize(); image++) {
-//            Matrix P = patches.get(image);
-//            P = P.transpose();
-//            Matrix KP = K.dot(P);
-//            System.out.println("forwardPropagation:: KP shape" + KP.shape());
-//        }
-//
-//        System.exit(0);
-//
-//        return null;
-//    }
-
     @Override
     public Tensor forwardPropagation(Tensor inputTensor) {
 
-        // https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
-        D4Matrix X = (D4Matrix) inputTensor;
-        
+        // Reference: https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
+
+        System.out.println("Conv2D inputShape " + inputShape);
 
 
-        System.exit(0);
+        input = (D4Matrix) inputTensor;
+        D4FeatureMatrix features = new D4FeatureMatrix(input.getDimensionCount());
+        A = features.buildFeatures(input, weight, kernelSize, filters, getOutputHeight(), getOutputWidth(), bias);
+        System.out.println("A shape = " + A.shape());
 
-        return null;
+        Z = new D4Matrix(A.getDimensionCount(), A.getDepthCount(), A.getRowCount(), A.getColumnCount());
+        for(int dim = 0;dim<A.getDimensionCount();dim++){
+            for(int depth = 0;depth<A.getDepthCount();depth++){
+                Matrix temp = A.getSubMatrix(dim, depth);
+                Matrix activated = activationFunction.activate(temp);
+                Z.setMatrix(dim, depth, activated);
+            }
+        }
+        System.out.println("Conv2D Z shape = " + Z.shape());
+
+        return Objects.isNull(nextLayer) ? Z : nextLayer.forwardPropagation(Z);
     }
 
     @Override
