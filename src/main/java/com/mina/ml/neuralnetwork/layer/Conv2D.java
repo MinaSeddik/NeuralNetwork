@@ -27,7 +27,7 @@ public class Conv2D extends Layerrr {
 
     private D4Matrix input;
     private D4Matrix A;
-    private D4Matrix Z;
+//    private D4Matrix Z;
 
     private String activationFunctionStr;
 
@@ -97,15 +97,15 @@ public class Conv2D extends Layerrr {
 
         // Reference: https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
 
-        System.out.println("Conv2D inputShape " + inputShape);
+//        System.out.println("Conv2D inputShape " + inputShape);
 
 
         input = (D4Matrix) inputTensor;
         D4FeatureMatrix features = new D4FeatureMatrix(input.getDimensionCount());
         A = features.buildFeatures(input, weight, kernelSize, filters, getOutputHeight(), getOutputWidth(), bias);
-        System.out.println("A shape = " + A.shape());
+//        System.out.println("A shape = " + A.shape());
 
-        Z = new D4Matrix(A.getDimensionCount(), A.getDepthCount(), A.getRowCount(), A.getColumnCount());
+        D4Matrix Z = new D4Matrix(A.getDimensionCount(), A.getDepthCount(), A.getRowCount(), A.getColumnCount());
         for(int dim = 0;dim<A.getDimensionCount();dim++){
             for(int depth = 0;depth<A.getDepthCount();depth++){
                 Matrix temp = A.getSubMatrix(dim, depth);
@@ -113,7 +113,7 @@ public class Conv2D extends Layerrr {
                 Z.setMatrix(dim, depth, activated);
             }
         }
-        System.out.println("Conv2D Z shape = " + Z.shape());
+//        System.out.println("Conv2D Z shape = " + Z.shape());
 
         return Objects.isNull(nextLayer) ? Z : nextLayer.forwardPropagation(Z);
     }

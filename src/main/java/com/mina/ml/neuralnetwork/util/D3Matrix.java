@@ -55,7 +55,7 @@ public class D3Matrix extends Tensor {
     }
 
     private void flat(double[][] result, int start, int end) {
-        int index = 0;
+        int index;
         for (int i = start; i < end; i++) {
             index = 0;
             for(int j=0;j<collection[i].length;j++){

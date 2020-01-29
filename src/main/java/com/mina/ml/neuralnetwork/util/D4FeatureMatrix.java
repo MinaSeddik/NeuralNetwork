@@ -30,7 +30,6 @@ public class D4FeatureMatrix extends D4Matrix {
         return new D4Matrix(result);
     }
 
-
     private void buildFeatures(double[][][][] result, D4Matrix X, D4Matrix weight, Pair<Integer, Integer> kernelSize,
                                int filters, int outputHeight, int outputWidth, Vector bias,
                                int startIndex, int endIndex) {

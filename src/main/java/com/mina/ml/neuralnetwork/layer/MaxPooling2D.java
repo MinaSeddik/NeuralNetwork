@@ -44,7 +44,7 @@ public class MaxPooling2D extends Layerrr {
     @Override
     public Tensor forwardPropagation(Tensor inputTensor) {
 
-        System.out.println("MaxPooling2D inputShape " + inputShape);
+//        System.out.println("MaxPooling2D inputShape " + inputShape);
 
         input = (D4Matrix) inputTensor;
         int outputHeight = input.getRowCount() / poolSize.getValue0();
@@ -58,7 +58,7 @@ public class MaxPooling2D extends Layerrr {
             }
         }
 
-        System.out.println("MaxPooling2D Y shape = " + Y.shape());
+//        System.out.println("MaxPooling2D Y shape = " + Y.shape());
 
         return Objects.isNull(nextLayer) ? Y : nextLayer.forwardPropagation(Y);
     }

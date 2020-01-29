@@ -28,7 +28,7 @@ public class Dense extends Layerrr {
 
     private Matrix input;
     private Matrix A;
-    private Matrix Z;
+//    private Matrix Z;
 
 //    private int numOfInputs;
 //    private int numOfOutputs;
@@ -117,7 +117,7 @@ public class Dense extends Layerrr {
     public Tensor forwardPropagation(Tensor in) {
         input = addBias(in);
         A = input.dot(weight);
-        Z = activationFunction.activate(A);
+        Matrix Z = activationFunction.activate(A);
 
         return Objects.isNull(nextLayer) ? Z : nextLayer.forwardPropagation(Z);
     }

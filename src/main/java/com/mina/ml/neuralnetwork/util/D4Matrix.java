@@ -30,14 +30,14 @@ public class D4Matrix extends Tensor {
         int n = collection.length;
         int m = collection[0].length * collection[0][0].length * collection[0][0][0].length;
         double[][] result = new double[n][m];
-//        parallelizeOperation((start, end) -> flat(result, start, end));
+        parallelizeOperation((start, end) -> flat(result, start, end));
 
-        flat(result, 0, n);
+//        flat(result, 0, n);
         return new Matrix(result);
     }
 
     private void flat(double[][] result, int start, int end) {
-        int index = 0;
+        int index;
         for (int i = start; i < end; i++) {
             index = 0;
             for (int j = 0; j < collection[i].length; j++) {

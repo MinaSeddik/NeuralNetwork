@@ -156,7 +156,7 @@ public class Sequential extends Model {
 
                 batchCount++;
                 batchStats = optimizer.optimize(inputLayer, outputLayer, lossFunction, xBatch, yBatch);
-
+                System.out.println(batchCount + "/" + (x.size()/batchSize));
                 trainStats = new Pair<>(trainStats.getValue0() + batchStats.getValue0(),
                         trainStats.getValue1() + batchStats.getValue1());
             }

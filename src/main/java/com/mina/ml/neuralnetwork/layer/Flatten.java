@@ -38,7 +38,7 @@ public class Flatten extends Layerrr {
     @Override
     public Tensor forwardPropagation(Tensor inputTensor) {
 
-        System.out.println("Flatten inputShape " + inputShape);
+//        System.out.println("Flatten inputShape " + inputShape);
 
         Matrix Y;
         if( inputTensor instanceof Matrix){
@@ -55,7 +55,7 @@ public class Flatten extends Layerrr {
             throw ex;
         }
 
-        System.out.println("Flatten Y shape = " + Y.shape());
+//        System.out.println("Flatten Y shape = " + Y.shape());
 //        System.exit(0);
 
         return Objects.isNull(nextLayer) ? Y : nextLayer.forwardPropagation(Y);
