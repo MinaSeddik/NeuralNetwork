@@ -61,7 +61,7 @@ public class MNistConvolutionalNeuralNetwork {
 //        List<ModelCheckpoint> callbacksList = Arrays.asList(new ModelCheckpoint(filePath));
         List<ModelCheckpoint> callbacksList = null;
 
-        System.out.println(String.format("Total Memory: %.4f Gigs" ,Runtime.getRuntime().totalMemory()/(1024d*1024d*1024d)));
+//        System.out.println(String.format("Total Memory: %.4f Gigs" ,Runtime.getRuntime().totalMemory()/(1024d*1024d*1024d)));
         model.fit(xTrain, yTrain, 0.1f, true, 128, 300,
                 Verbosity.VERBOSE, callbacksList);
 

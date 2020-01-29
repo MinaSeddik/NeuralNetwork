@@ -146,21 +146,20 @@ public class Sequential extends Model {
             Pair<Double, Double> trainStats = new Pair<>(0d, 0d);
             Pair<Double, Double> batchStats;
             while (partitioner.hasNext()) {
-
                 Pair<List<? extends Object>, List<? extends Object>> batch = partitioner.getNext();
 //                Matrix xBatch = new Matrix(batch.getValue0());
 //                Matrix yBatch = new Matrix(batch.getValue1());
+//                System.out.println("Xn = " + batch.getValue0().size() + ", Yn = " + batch.getValue1().size());
 
                 Tensor xBatch = Tensor.getTensor(batch.getValue0());
                 Tensor yBatch = Tensor.getTensor(batch.getValue1());
 
                 batchCount++;
                 batchStats = optimizer.optimize(inputLayer, outputLayer, lossFunction, xBatch, yBatch);
-                System.out.println(batchCount + "/" + (x.size()/batchSize));
+//                System.out.println(batchCount + "/" + (x.size() / batchSize));
                 trainStats = new Pair<>(trainStats.getValue0() + batchStats.getValue0(),
                         trainStats.getValue1() + batchStats.getValue1());
             }
-
             Pair<Double, Double> testLoss = evaluate(xTest, yTest);
 
             double loss = trainStats.getValue0() / batchCount;
@@ -196,18 +195,40 @@ public class Sequential extends Model {
 
         Layerrr inputLayer = layers.get(0);
 
+        double loss = 0, acc = 0;
+        Partitioner partitioner = new Partitioner(data, labels, 32);
+        int count = 0;
+        while (partitioner.hasNext()) {
+
+            Pair<List<? extends Object>, List<? extends Object>> batch = partitioner.getNext();
+
+            Tensor x = Tensor.getTensor(batch.getValue0());
+            Matrix y = (Matrix) Tensor.getTensor(batch.getValue1());
+
+//            Tensor x = Tensor.getTensor(data);
+//            Matrix y = (Matrix) Tensor.getTensor(labels);
+
+            Matrix yPrime = (Matrix) inputLayer.forwardPropagation(x);
+
+            loss+= lossFunction.meanErrorCost(y, yPrime);
+            acc+= lossFunction.calculateAccuracy(y, yPrime);
+
+            count++;
+        }
+
+
 //        Matrix x = new Matrix(data);
 //        Matrix y = new Matrix(labels);
 
-        Tensor x = Tensor.getTensor(data);
-        Matrix y = (Matrix) Tensor.getTensor(labels);
+//        Tensor x = Tensor.getTensor(data);
+//        Matrix y = (Matrix) Tensor.getTensor(labels);
 
-        Matrix yPrime = (Matrix) inputLayer.forwardPropagation(x);
+//        Matrix yPrime = (Matrix) inputLayer.forwardPropagation(x);
+//
+//        loss = lossFunction.meanErrorCost(y, yPrime);
+//        acc = lossFunction.calculateAccuracy(y, yPrime);
 
-        double loss = lossFunction.meanErrorCost(y, yPrime);
-        double acc = lossFunction.calculateAccuracy(y, yPrime);
-
-        return new Pair<>(loss, acc);
+        return new Pair<>(loss/count, acc/count);
     }
 
     @Override
