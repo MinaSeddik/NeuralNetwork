@@ -1,6 +1,7 @@
 package com.mina.ml.neuralnetwork.layer;
 
 import com.mina.ml.neuralnetwork.util.D4Matrix;
+import com.mina.ml.neuralnetwork.util.D4WeightMatrix;
 import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.Tensor;
 import org.javatuples.Pair;
@@ -18,6 +19,8 @@ public class MaxPooling2D extends Layerrr {
 
     private Quartet<Integer, Integer, Integer, Integer> inputShape;
     private Pair<Integer, Integer> poolSize;
+
+    private D4WeightMatrix weight;
 
     private D4Matrix input;
     private D4Matrix Y;
@@ -47,13 +50,20 @@ public class MaxPooling2D extends Layerrr {
 //        System.out.println("MaxPooling2D inputShape " + inputShape);
 
         input = (D4Matrix) inputTensor;
+
+        // re-create weight matrix every time
+        weight = new D4WeightMatrix(input.getDimensionCount(), input.getDepthCount(),
+                input.getRowCount(), input.getColumnCount());
+
         int outputHeight = input.getRowCount() / poolSize.getValue0();
         int outputWidth = input.getColumnCount() / poolSize.getValue0();
 
         Y = new D4Matrix(input.getDimensionCount(), input.getDepthCount(), outputHeight, outputWidth);
+//        Pair<Integer, Integer> maxIndices = new Pair<>(0, 0);
         for (int dim = 0; dim < input.getDimensionCount(); dim++) {
             for (int depth = 0; depth < input.getDepthCount(); depth++) {
-                Matrix maxPoolMatrix = applyPooling(input.getSubMatrix(dim, depth));
+//                Matrix maxPoolMatrix = applyPooling(input.getSubMatrix(dim, depth), maxIndices);
+                Matrix maxPoolMatrix = applyPooling(dim, depth);
                 Y.setMatrix(dim, depth, maxPoolMatrix);
             }
         }
@@ -63,7 +73,8 @@ public class MaxPooling2D extends Layerrr {
         return Objects.isNull(nextLayer) ? Y : nextLayer.forwardPropagation(Y);
     }
 
-    private Matrix applyPooling(Matrix matrix) {
+    private Matrix applyPooling(int dim, int depth) {
+        Matrix matrix = input.getSubMatrix(dim, depth);
         int height = matrix.getRowCount() / 2;
         int width = matrix.getColumnCount() / 2;
 
@@ -71,8 +82,8 @@ public class MaxPooling2D extends Layerrr {
         double[][] mat = matrix.getMatrix();
         int r = 0, c = 0;
         for (int i = 0; i < mat.length; i += poolSize.getValue0()) {
-            for (int j = 0; j < mat[0].length; j += poolSize.getValue0()) {
-                result[r][c++] = applyMaxPooling(mat, i, j);
+            for (int j = 0; j < mat[0].length; j += poolSize.getValue1()) {
+                result[r][c++] = applyMaxPooling(mat, i, j, dim, depth);
             }
             r++;
             c = 0;
@@ -81,16 +92,23 @@ public class MaxPooling2D extends Layerrr {
         return new Matrix(result);
     }
 
-    private double applyMaxPooling(double[][] mat, int row, int col) {
+    private double applyMaxPooling(double[][] mat, int row, int col, int dim, int depth) {
         double value = mat[row][col];
+        int maxRow = row;
+        int maxCol = col;
 
         for (int i = row; i < row + poolSize.getValue0(); i++) {
             for (int j = col; j < col + poolSize.getValue1(); j++) {
                 if (mat[i][j] > value) {
                     value = mat[i][j];
+                    maxRow = i;
+                    maxCol = j;
                 }
             }
         }
+
+        // manually update weight
+        weight.getMatrix()[dim][depth][maxRow][maxCol] = 1d;
 
         return value;
     }
@@ -102,7 +120,53 @@ public class MaxPooling2D extends Layerrr {
 
     @Override
     public void backPropagation(Tensor costPrime) {
+//        System.out.println("MaxPooling2D costPrime shape = " + costPrime.shape());
+//        System.out.println("MaxPooling2D inputShape shape = " + inputShape);
+//        System.out.println("MaxPooling2D poolSize shape = " + poolSize);
 
+        D4Matrix cost = new D4Matrix(input.getDimensionCount(), input.getDepthCount());
+        for (int dim = 0; dim < input.getDimensionCount(); dim++) {
+            for (int depth = 0; depth < input.getDepthCount(); depth++) {
+                Matrix reversePoolMatrix = applyReversePooling((D4Matrix) costPrime, dim, depth);
+                cost.setMatrix(dim, depth, reversePoolMatrix);
+            }
+        }
+
+//        System.out.println("MaxPooling2D cost = " + cost.shape());
+
+        if (!Objects.isNull(prevLayer)) {
+            prevLayer.backPropagation(cost);
+        }
+
+    }
+
+    private Matrix applyReversePooling(D4Matrix cost, int dim, int depth) {
+        double[][] costMatrix = cost.getSubMatrix(dim, depth).getMatrix();
+        double[][] weightMatrix = weight.getSubMatrix(dim, depth).getMatrix();
+
+        double[][] result = new double[weightMatrix.length][weightMatrix[0].length];
+
+        Pair<Integer, Integer> indices;
+        for (int i = 0; i < weightMatrix.length; i += poolSize.getValue0()) {
+            for (int j = 0; j < weightMatrix[i].length; j += poolSize.getValue1()) {
+                indices = applyReverseMaxPooling(weightMatrix, i, j);
+                result[indices.getValue0()][indices.getValue1()] = costMatrix[indices.getValue0() / poolSize.getValue0()][indices.getValue1() / poolSize.getValue1()];
+            }
+        }
+
+        return new Matrix(result);
+    }
+
+    private Pair<Integer, Integer> applyReverseMaxPooling(double[][] weightMatrix, int row, int col) {
+        for (int i = row; i < row + poolSize.getValue0(); i++) {
+            for (int j = col; j < col + poolSize.getValue1(); j++) {
+                if (weightMatrix[i][j] == 1d) {
+                    return new Pair<>(i, j);
+                }
+            }
+        }
+
+        throw new RuntimeException("Invalid Reverse Max Pooling");
     }
 
     @Override
@@ -112,7 +176,7 @@ public class MaxPooling2D extends Layerrr {
 
     @Override
     public Tensor getWeights() {
-        return null;
+        return weight;
     }
 
     @Override
@@ -127,6 +191,6 @@ public class MaxPooling2D extends Layerrr {
 
     @Override
     public Tuple getOutputShape() {
-        return new Quartet<>(inputShape.getValue0(), inputShape.getValue1(), inputShape.getValue2() / 2, inputShape.getValue3() / 2);
+        return new Quartet<>(inputShape.getValue0(), inputShape.getValue1(), inputShape.getValue2() / poolSize.getValue0(), inputShape.getValue3() / poolSize.getValue1());
     }
 }

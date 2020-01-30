@@ -41,15 +41,15 @@ public class Flatten extends Layerrr {
 //        System.out.println("Flatten inputShape " + inputShape);
 
         Matrix Y;
-        if( inputTensor instanceof Matrix){
+        if (inputTensor instanceof Matrix) {
             Y = (Matrix) inputTensor;
-        }else if( inputTensor instanceof D3Matrix){
+        } else if (inputTensor instanceof D3Matrix) {
             D3Matrix input = (D3Matrix) inputTensor;
             Y = input.flat();
-        }else if( inputTensor instanceof D4Matrix){
+        } else if (inputTensor instanceof D4Matrix) {
             D4Matrix input = (D4Matrix) inputTensor;
             Y = input.flat();
-        }else{
+        } else {
             RuntimeException ex = new RuntimeException("UnSupported Input Shape");
             logger.error("{}, Exception: {}", ex.getMessage(), ex);
             throw ex;
@@ -68,7 +68,36 @@ public class Flatten extends Layerrr {
 
     @Override
     public void backPropagation(Tensor costPrime) {
+//        System.out.println("Flatten costPrime shape = " + costPrime.shape());
+//        System.out.println("Flatten inputShape shape = " + inputShape);
 
+        Matrix costPrimeMatrix = (Matrix) costPrime;
+        Tensor cost;
+        switch (inputShape.getClass().getName()) {
+            case "org.javatuples.Pair":
+                cost = costPrimeMatrix;
+                break;
+            case "org.javatuples.Triplet":
+                Triplet<Integer, Integer, Integer> shape3 = (Triplet<Integer, Integer, Integer>) inputShape;
+                D3Matrix d3Matrix = new D3Matrix(costPrimeMatrix.getRowCount(), shape3.getValue1(), shape3.getValue2());
+                cost = d3Matrix.reshape(costPrimeMatrix);
+                break;
+            case "org.javatuples.Quartet":
+                Quartet<Integer, Integer, Integer, Integer> shape4 = (Quartet<Integer, Integer, Integer, Integer>) inputShape;
+                D4Matrix d4Matrix = new D4Matrix(costPrimeMatrix.getRowCount(), shape4.getValue1(), shape4.getValue2(), shape4.getValue3());
+                cost = d4Matrix.reshape(costPrimeMatrix);
+                break;
+            default:
+                RuntimeException ex = new RuntimeException("UnSupported Input Shape");
+                logger.error("{}, Exception: {}", ex.getMessage(), ex);
+                throw ex;
+        }
+
+//        System.out.println("cost.shape(): " + cost.shape());
+
+        if (!Objects.isNull(prevLayer)) {
+            prevLayer.backPropagation(cost);
+        }
     }
 
     @Override

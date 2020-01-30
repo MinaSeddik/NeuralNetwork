@@ -106,8 +106,8 @@ public class Conv2D extends Layerrr {
 //        System.out.println("A shape = " + A.shape());
 
         D4Matrix Z = new D4Matrix(A.getDimensionCount(), A.getDepthCount(), A.getRowCount(), A.getColumnCount());
-        for(int dim = 0;dim<A.getDimensionCount();dim++){
-            for(int depth = 0;depth<A.getDepthCount();depth++){
+        for (int dim = 0; dim < A.getDimensionCount(); dim++) {
+            for (int depth = 0; depth < A.getDepthCount(); depth++) {
                 Matrix temp = A.getSubMatrix(dim, depth);
                 Matrix activated = activationFunction.activate(temp);
                 Z.setMatrix(dim, depth, activated);
@@ -125,6 +125,26 @@ public class Conv2D extends Layerrr {
 
     @Override
     public void backPropagation(Tensor costPrime) {
+
+        //dE/dZ
+        D4Matrix dE_dZ = (D4Matrix) costPrime;
+        System.out.println("dE/dZ shape = " + dE_dZ.shape());
+
+
+        // Calculate the gradient for the Bias
+        // dE/dB = dE/dZ . dZ/dB
+//        Vector deltaBias = new Vector(filters);
+        Matrix deltaBias = new Matrix(dE_dZ.getDimensionCount(), filters);
+        for (int dim = 0; dim < dE_dZ.getDimensionCount(); dim++) {
+            for (int filter = 0; filter < dE_dZ.getDepthCount(); filter++) {
+//                Vector db = dE_dZ.getSubMatrix(dim, filter);
+//                deltaBias[dim][filter] =
+
+            }
+        }
+
+//        System.exit(0);
+
 
     }
 

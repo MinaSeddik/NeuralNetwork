@@ -26,14 +26,22 @@ public class D4Matrix extends Tensor {
         parallelizeOperation((start, end) -> list2Array(list, start, end));
     }
 
+    public D4Matrix(int dimension, int depth) {
+        collection = new double[dimension][depth][][];
+    }
+
     public Matrix flat() {
         int n = collection.length;
         int m = collection[0].length * collection[0][0].length * collection[0][0][0].length;
         double[][] result = new double[n][m];
         parallelizeOperation((start, end) -> flat(result, start, end));
 
-//        flat(result, 0, n);
         return new Matrix(result);
+    }
+
+    public D4Matrix reshape(Matrix matrix) {
+        parallelizeOperation((start, end) -> reshape(matrix.getMatrix(), start, end));
+        return this;
     }
 
     private void flat(double[][] result, int start, int end) {
@@ -44,6 +52,20 @@ public class D4Matrix extends Tensor {
                 for (int k = 0; k < collection[i][j].length; k++) {
                     for (int l = 0; l < collection[i][j][k].length; l++) {
                         result[i][index++] = collection[i][j][k][l];
+                    }
+                }
+            }
+        }
+    }
+
+    private void reshape(double[][] matrix, int startIndex, int endIndex) {
+        int index;
+        for (int i = startIndex; i < endIndex; i++) {
+            index = 0;
+            for (int j = 0; j < collection[0].length; j++) {
+                for (int k = 0; k < collection[0][0].length; k++) {
+                    for (int l = 0; l < collection[0][0][0].length; l++) {
+                        collection[i][j][k][l] = matrix[i][index++];
                     }
                 }
             }
@@ -180,5 +202,27 @@ public class D4Matrix extends Tensor {
 
     public D3Matrix getDimension(int dim) {
         return new D3Matrix(collection[dim]);
+    }
+
+    public D4Matrix reset() {
+        return initialize(0d);
+    }
+
+    public D4Matrix initialize(double value) {
+        parallelizeOperation((start, end) -> initialize(value, start, end));
+
+        return this;
+    }
+
+    private void initialize(double val, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        collection[i][j][k][l] = val;
+                    }
+                }
+            }
+        }
     }
 }

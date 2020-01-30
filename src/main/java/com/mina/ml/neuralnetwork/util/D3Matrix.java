@@ -37,7 +37,7 @@ public class D3Matrix extends Tensor {
         return collection[0][0].length;
     }
 
-    public Matrix get(int index){
+    public Matrix get(int index) {
         return new Matrix(collection[index]);
     }
 
@@ -45,7 +45,7 @@ public class D3Matrix extends Tensor {
         return collection;
     }
 
-    public Matrix flat(){
+    public Matrix flat() {
         int n = collection.length;
         int m = collection[0].length * collection[0][0].length;
         double[][] result = new double[n][m];
@@ -54,12 +54,17 @@ public class D3Matrix extends Tensor {
         return new Matrix(result);
     }
 
+    public D3Matrix reshape(Matrix matrix) {
+        parallelizeOperation((start, end) -> reshape(matrix.getMatrix(), start, end));
+        return this;
+    }
+
     private void flat(double[][] result, int start, int end) {
         int index;
         for (int i = start; i < end; i++) {
             index = 0;
-            for(int j=0;j<collection[i].length;j++){
-                for(int k=0;k<collection[i][j].length;k++){
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
                     result[i][index++] = collection[i][j][k];
                 }
             }
@@ -89,6 +94,18 @@ public class D3Matrix extends Tensor {
             for (int j = 0; j < collection[i].length; j++) {
                 for (int k = 0; k < collection[i][j].length; k++) {
                     collection[i][j][k] = list.get(i)[j][k];
+                }
+            }
+        }
+    }
+
+    private void reshape(double[][] matrix, int startIndex, int endIndex) {
+        int index;
+        for (int i = startIndex; i < endIndex; i++) {
+            index = 0;
+            for (int j = 0; j < collection[0].length; j++) {
+                for (int k = 0; k < collection[0][0].length; k++) {
+                    collection[i][j][k] = matrix[i][index++];
                 }
             }
         }
