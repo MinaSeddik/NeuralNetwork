@@ -8,7 +8,9 @@ import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 // https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
 public class Conv2D extends Layerrr {
@@ -21,13 +23,13 @@ public class Conv2D extends Layerrr {
     private int filters;
 
     private D4WeightMatrix weight;
-    private D4WeightMatrix deltaWeight;
+    private D4Matrix deltaWeight;
 
     private Vector bias;
+    private Vector deltaBias;
 
     private D4Matrix input;
     private D4Matrix A;
-//    private D4Matrix Z;
 
     private String activationFunctionStr;
 
@@ -105,14 +107,7 @@ public class Conv2D extends Layerrr {
         A = features.buildFeatures(input, weight, kernelSize, filters, getOutputHeight(), getOutputWidth(), bias);
 //        System.out.println("A shape = " + A.shape());
 
-        D4Matrix Z = new D4Matrix(A.getDimensionCount(), A.getDepthCount(), A.getRowCount(), A.getColumnCount());
-        for (int dim = 0; dim < A.getDimensionCount(); dim++) {
-            for (int depth = 0; depth < A.getDepthCount(); depth++) {
-                Matrix temp = A.getSubMatrix(dim, depth);
-                Matrix activated = activationFunction.activate(temp);
-                Z.setMatrix(dim, depth, activated);
-            }
-        }
+        D4Matrix Z = activationFunction.activate(A);
 //        System.out.println("Conv2D Z shape = " + Z.shape());
 
         return Objects.isNull(nextLayer) ? Z : nextLayer.forwardPropagation(Z);
@@ -128,39 +123,113 @@ public class Conv2D extends Layerrr {
 
         //dE/dZ
         D4Matrix dE_dZ = (D4Matrix) costPrime;
-        System.out.println("dE/dZ shape = " + dE_dZ.shape());
+//        System.out.println("dE/dZ shape = " + dE_dZ.shape());
 
+        // dZ/dA
+        D4Matrix dZ_dA = activationFunction.activatePrime(A);
+//        System.out.println("dZ/dA shape = " + dZ_dA.shape());
 
-        // Calculate the gradient for the Bias
-        // dE/dB = dE/dZ . dZ/dB
-//        Vector deltaBias = new Vector(filters);
-        Matrix deltaBias = new Matrix(dE_dZ.getDimensionCount(), filters);
-        for (int dim = 0; dim < dE_dZ.getDimensionCount(); dim++) {
-            for (int filter = 0; filter < dE_dZ.getDepthCount(); filter++) {
-//                Vector db = dE_dZ.getSubMatrix(dim, filter);
-//                deltaBias[dim][filter] =
+        // dE/dZ
+        D4Matrix dE_dA = dE_dZ.elementWiseProduct(dZ_dA);
+//        System.out.println("dE/dA shape = " + dE_dA.shape());
 
+        // (1) Calculate the gradient for the Bias
+        calculateDeltaBias(dE_dA);
+
+        // (2) Calculate the gradient for the Weights
+        calculateDeltaWeights(dE_dA);
+
+        if (!Objects.isNull(prevLayer)) {
+            D4Matrix cost = calculateOutput(dE_dA);
+            prevLayer.backPropagation(cost);
+        }
+
+    }
+
+    private D4Matrix calculateOutput(D4Matrix dE_dA) {
+        D4FeatureMatrix features = new D4FeatureMatrix(input.getDimensionCount());
+
+        return features.calculateOutputPrime(dE_dA, input, weight, kernelSize, filters, padding);
+    }
+
+    private void calculateDeltaWeights(D4Matrix dE_dA) {
+        int numberOfSamples = dE_dA.getDimensionCount();
+
+        deltaWeight.reset();
+        for (int n = 0; n < numberOfSamples; n++) {
+            D3Matrix dEdA = dE_dA.getSubMatrix(n);
+            D3Matrix X = input.getSubMatrix(n);
+            D4Matrix delta = calculateEntryDeltaWeight(dEdA, X);
+            deltaWeight.add(delta);
+        }
+        // get Average delta-weights
+        deltaWeight.divide(numberOfSamples);
+    }
+
+    private void calculateDeltaBias(D4Matrix dE_dA) {
+        // number of samples
+        int numberOfSamples = dE_dA.getDimensionCount();
+
+        double[][] dy = new double[numberOfSamples][filters];
+        for (int n = 0; n < numberOfSamples; n++) {
+            for (int filter = 0; filter < filters; filter++) {
+                dy[n][filter] = dE_dA.getSubMatrix(n, filter).sumAllElements();
             }
         }
 
-//        System.exit(0);
+        List<Double> avgs = new Matrix(dy).transpose()
+                .asVectors()
+                .parallelStream()
+                .map(v -> v.average())
+                .collect(Collectors.toList());
+        deltaBias = new Vector(avgs.stream()
+                .mapToDouble(Double::doubleValue)
+                .toArray());
+    }
 
+    private D4Matrix calculateEntryDeltaWeight(D3Matrix dE, D3Matrix X) {
+        assert filters == dE.getDepthCount();
+        int channels = X.getDepthCount();
+        int kernalHeight = kernelSize.getValue0();
+        int kernalWidth = kernelSize.getValue1();
 
+        double[][][] x = X.getMatrix();
+        double[][][] cost = dE.getMatrix();
+
+        double[][][][] result = new double[filters][channels][kernalHeight][kernalWidth];
+        for (int f = 0; f < filters; f++) {
+            for (int i = 0; i < kernalHeight; i++) {
+                for (int j = 0; j < kernalWidth; j++) {
+                    for (int k = 0; k < kernalHeight; k++) {
+                        for (int l = 0; l < kernalWidth; l++) {
+                            for (int c = 0; c < channels; c++) {
+                                result[f][c][i][j] += x[c][i + k][j + l] * cost[f][k][l];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new D4Matrix(result);
     }
 
     @Override
     public void updateWeight(double learningRate) {
-
+        weight.updateWeights(deltaWeight, learningRate);
+        if (!Objects.isNull(nextLayer)) {
+            nextLayer.updateWeight(learningRate);
+        }
     }
 
     @Override
     public Tensor getWeights() {
-        return null;
+        return weight;
     }
 
     @Override
     public void setWeights(Tensor weight) {
-
+        this.weight = (D4WeightMatrix) weight;
     }
 
     @Override

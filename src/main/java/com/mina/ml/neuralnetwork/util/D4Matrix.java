@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class D4Matrix extends Tensor {
 
@@ -44,6 +45,57 @@ public class D4Matrix extends Tensor {
         return this;
     }
 
+    public D4Matrix apply(Function<Double, Double> function) {
+        double[][][][] result = new double[collection.length][collection[0].length][collection[0][0].length][collection[0][0][0].length];
+        parallelizeOperation((start, end) -> apply(result, function, start, end));
+
+        return new D4Matrix(result);
+    }
+
+    private void apply(double[][][][] result, Function<Double, Double> function, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        result[i][j][k][l] = function.apply(collection[i][j][k][l]);
+                    }
+                }
+            }
+        }
+    }
+
+    public D4Matrix add(D4Matrix mat) {
+        parallelizeOperation((start, end) -> add(mat.collection, start, end));
+
+        return this;
+    }
+
+    public D4Matrix divide(int value) {
+        double[][][][] result = new double[collection.length][collection[0].length][collection[0][0].length][collection[0][0][0].length];
+        parallelizeOperation((start, end) -> divide(value, start, end));
+
+        return new D4Matrix(result);
+    }
+
+    public D4Matrix elementWiseProduct(D4Matrix mat) {
+        double[][][][] result = new double[collection.length][collection[0].length][collection[0][0].length][collection[0][0][0].length];
+        parallelizeOperation((start, end) -> elementWiseProduct(result, mat.collection, start, end));
+
+        return new D4Matrix(result);
+    }
+
+    private void elementWiseProduct(double[][][][] result, double[][][][] mat, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        result[i][j][k][l] = collection[i][j][k][l] * mat[i][j][k][l];
+                    }
+                }
+            }
+        }
+    }
+
     private void flat(double[][] result, int start, int end) {
         int index;
         for (int i = start; i < end; i++) {
@@ -78,30 +130,6 @@ public class D4Matrix extends Tensor {
 
         double[][][] result = new double[size][][];
         parallelizeOperation((start, end) -> matrixPatches(result, windowHeight, start, end));
-
-        return new D3Matrix(result);
-    }
-
-    public D3Matrix matrixPatches_test(Pair<Integer, Integer> window) {
-        int size = getDimensionCount();
-        int channels = getDepthCount();
-        int matrixHeight = getRowCount();
-        int matrixWidth = getColumnCount();
-        int windowHeight = window.getValue0();
-        int windowWidth = window.getValue1();
-
-        int numOfPatches = (matrixHeight - windowHeight + 1) * (matrixWidth - windowWidth + 1);
-        int windowSize = windowHeight * windowWidth;
-
-        double[][][] result = new double[size][][];
-
-        System.out.println(size);
-        System.out.println(numOfPatches);
-        System.out.println(channels);
-        System.out.println(windowSize);
-        System.out.println();
-        matrixPatches(result, windowHeight, 0, size);
-
 
         return new D3Matrix(result);
     }
@@ -184,6 +212,10 @@ public class D4Matrix extends Tensor {
         return new Matrix(collection[dim][depth]).clone();
     }
 
+    public D3Matrix getSubMatrix(int dim) {
+        return new D3Matrix(collection[dim]).clone();
+    }
+
     public void setMatrix(int dim, int depth, Matrix mat) {
         collection[dim][depth] = mat.getMatrix();
     }
@@ -225,4 +257,67 @@ public class D4Matrix extends Tensor {
             }
         }
     }
+
+    private void add(double[][][][] mat, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        collection[i][j][k][l]+= mat[i][j][k][l];
+                    }
+                }
+            }
+        }
+    }
+
+    private void divide(int value, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        collection[i][j][k][l]/= value;
+                    }
+                }
+            }
+        }
+    }
+
+    public D4WeightMatrix transpose() {
+        double[][][][] result = new double[collection.length][collection[0].length][collection[0][0][0].length][collection[0][0].length];
+        parallelizeOperation((start, end) -> transpose(result, start, end));
+
+        return new D4WeightMatrix(result);
+    }
+
+    public D4WeightMatrix addZeroPadding(int rows, int cols) {
+        double[][][][] result = new double[collection.length][collection[0].length][collection[0][0].length + rows][collection[0][0][0].length + cols];
+        parallelizeOperation((start, end) -> addZeroPadding(result, start, end));
+
+        return new D4WeightMatrix(result);
+    }
+
+    private void addZeroPadding(double[][][][] result,int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        result[i][j][k][l] = collection[i][j][k][l];
+                    }
+                }
+            }
+        }
+    }
+
+    private void transpose(double[][][][] result, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        result[i][j][l][k] = collection[i][j][k][l];
+                    }
+                }
+            }
+        }
+    }
+
 }

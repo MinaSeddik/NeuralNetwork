@@ -171,7 +171,9 @@ public class MaxPooling2D extends Layerrr {
 
     @Override
     public void updateWeight(double learningRate) {
-
+        if (!Objects.isNull(nextLayer)) {
+            nextLayer.updateWeight(learningRate);
+        }
     }
 
     @Override
@@ -181,7 +183,7 @@ public class MaxPooling2D extends Layerrr {
 
     @Override
     public void setWeights(Tensor weight) {
-
+        this.weight = (D4WeightMatrix) weight;
     }
 
     @Override

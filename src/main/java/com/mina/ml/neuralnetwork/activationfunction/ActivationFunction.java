@@ -1,5 +1,6 @@
 package com.mina.ml.neuralnetwork.activationfunction;
 
+import com.mina.ml.neuralnetwork.util.D4Matrix;
 import com.mina.ml.neuralnetwork.util.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,15 @@ public abstract class ActivationFunction implements Serializable {
         return matrix.apply(val -> activate(val));
     }
 
+    public D4Matrix activate(D4Matrix matrix) {
+        return matrix.apply(val -> activate(val));
+    }
+
     public Matrix activatePrime(Matrix matrix) {
+        return matrix.apply(val -> activatePrime(val));
+    }
+
+    public D4Matrix activatePrime(D4Matrix matrix) {
         return matrix.apply(val -> activatePrime(val));
     }
 

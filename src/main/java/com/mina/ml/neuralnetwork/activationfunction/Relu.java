@@ -13,7 +13,7 @@ public class Relu extends ActivationFunction {
 
     @Override
     public double activate(double value) {
-        return Math.max(0f, value);
+        return Math.max(0d, value);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class Relu extends ActivationFunction {
         assert (value != 0);
 
         // if x == 0 then the Relu is UNDEFINED
-        return value < 0f ? 0f : 1f;
+        return value < 0d ? 0d : 1d;
     }
 
 }

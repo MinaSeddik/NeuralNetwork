@@ -172,14 +172,11 @@ public class Dense extends Layerrr {
 //        System.out.println(deltas.size());
         deltaWeight = totalDeltas.divide(input.getRowCount());
 
-        Matrix weightT = weight.transpose();
-        Matrix cost = dE_dA.dot(weightT);
-        cost = removeBias(cost);
-//        System.out.println("weight-T shape = " + weightT.shape());
-//        System.out.println("dE_dA shape = " + dE_dA.shape());
-//        System.out.println("cost shape = " + cost.shape());
-
         if (!Objects.isNull(prevLayer)) {
+            Matrix weightT = weight.transpose();
+            Matrix cost = dE_dA.dot(weightT);
+            cost = removeBias(cost);
+
             prevLayer.backPropagation(cost);
         }
 

@@ -102,7 +102,9 @@ public class Flatten extends Layerrr {
 
     @Override
     public void updateWeight(double learningRate) {
-
+        if (!Objects.isNull(nextLayer)) {
+            nextLayer.updateWeight(learningRate);
+        }
     }
 
     @Override
@@ -112,7 +114,7 @@ public class Flatten extends Layerrr {
 
     @Override
     public void setWeights(Tensor weight) {
-
+        // N/A
     }
 
     @Override

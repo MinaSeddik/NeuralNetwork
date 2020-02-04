@@ -1,5 +1,6 @@
 package com.mina.ml.neuralnetwork.activationfunction;
 
+import com.mina.ml.neuralnetwork.util.D4Matrix;
 import com.mina.ml.neuralnetwork.util.Matrix;
 import com.mina.ml.neuralnetwork.util.Vector;
 import org.javatuples.Pair;
@@ -31,6 +32,22 @@ public class SoftMax extends ActivationFunction {
         }
 
         return result;
+    }
+
+    @Override
+    public D4Matrix activate(D4Matrix matrix) {
+        D4Matrix output = new D4Matrix(matrix.getDimensionCount(), matrix.getDepthCount(),
+                matrix.getRowCount(), matrix.getColumnCount());
+
+        for (int dim = 0; dim < matrix.getDimensionCount(); dim++) {
+            for (int depth = 0; depth < matrix.getDepthCount(); depth++) {
+                Matrix temp = matrix.getSubMatrix(dim, depth);
+                Matrix activated = activate(temp);
+                output.setMatrix(dim, depth, activated);
+            }
+        }
+
+        return output;
     }
 
     /* new implementation */

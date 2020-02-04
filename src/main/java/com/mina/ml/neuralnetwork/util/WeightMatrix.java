@@ -26,18 +26,8 @@ public class WeightMatrix extends Matrix {
     }
 
     public Matrix initializeRandom(double min, double max) {
-//        double rangeMin = -1.0d;
-//        double rangeMax = 1.0d;
         Random random = new Random();
-//        r.setSeed(100);
 
-
-//        logger.debug(String.format("Initializing Weights between [%.2f] and [%.2f]", rangeMin, rangeMax));
-//        for (int i = 0; i < collection.length; i++) {
-//            for (int j = 0; j < collection[0].length; j++) {
-//                collection[i][j] = rangeMin + (rangeMax - rangeMin) * r.nextDouble();
-//            }
-//        }
         logger.debug(String.format("Initializing Weights between [%.2f] and [%.2f]", min, max));
         parallelizeOperation((start, end) -> initializeRandom(random, min, max, start, end));
 

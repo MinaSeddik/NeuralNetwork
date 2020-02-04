@@ -64,6 +64,13 @@ public class Matrix extends Tensor {
         return new Matrix(result);
     }
 
+    public double sumAllElements() {
+        double[] vec = new double[collection.length];
+        parallelizeOperation((start, end) -> sumAllElements(vec, start, end));
+
+        return Arrays.stream(vec).sum();
+    }
+
     public Matrix divide(double value) {
         double[][] result = new double[collection.length][collection[0].length];
         parallelizeOperation((start, end) -> divide(result, value, start, end));
@@ -201,6 +208,14 @@ public class Matrix extends Tensor {
         }
     }
 
+    private void sumAllElements(double[] vec, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                vec[i] += collection[i][j];
+            }
+        }
+    }
+
     private void add(double[][] result, List<Matrix> deltas, int startIndex, int endIndex) {
         for (Matrix mat : deltas) {
             for (int i = startIndex; i < endIndex; i++) {
@@ -271,7 +286,7 @@ public class Matrix extends Tensor {
     private void apply(double[][] result, Matrix mat1, Matrix mat2, Function<Pair<Double, Double>, Double> function, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
-                result[i][j] = function.apply(new Pair<Double, Double>(mat1.collection[i][j], mat2.collection[i][j]));
+                result[i][j] = function.apply(new Pair<>(mat1.collection[i][j], mat2.collection[i][j]));
             }
         }
     }
@@ -324,6 +339,5 @@ public class Matrix extends Tensor {
         }
         logger.info(matrixAsString.toString());
     }
-
 
 }

@@ -27,7 +27,7 @@ public class D4WeightMatrix extends D4Matrix {
         return this;
     }
 
-    public Matrix reshape2D(){
+    public Matrix reshape2D() {
         int size = getDimensionCount();
         double[][] result = new double[size][];
         parallelizeOperation((start, end) -> reshape2D(result, start, end));
@@ -67,4 +67,24 @@ public class D4WeightMatrix extends D4Matrix {
             }
         }
     }
+
+    public D4WeightMatrix updateWeights(D4Matrix deltaWeight, double learningRate) {
+        parallelizeOperation((start, end) -> updateWeights(deltaWeight.collection, learningRate, start, end));
+
+        return this;
+    }
+
+    private void updateWeights(double[][][][] deltaWeight, double learningRate, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    for (int l = 0; l < collection[i][j][k].length; l++) {
+                        collection[i][j][k][l] -= learningRate * deltaWeight[i][j][k][l];
+                    }
+                }
+            }
+        }
+    }
+
+
 }

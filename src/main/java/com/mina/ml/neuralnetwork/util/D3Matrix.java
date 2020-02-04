@@ -3,6 +3,7 @@ package com.mina.ml.neuralnetwork.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class D3Matrix extends Tensor {
@@ -110,4 +111,14 @@ public class D3Matrix extends Tensor {
             }
         }
     }
+
+    public D3Matrix clone() {
+        double[][][] copy = new double[collection.length][][];
+        for(int i=0;i<collection.length;i++){
+            copy[i] = Arrays.stream(collection[i]).map(double[]::clone).toArray(double[][]::new);
+        }
+
+        return new D3Matrix(copy);
+    }
+
 }

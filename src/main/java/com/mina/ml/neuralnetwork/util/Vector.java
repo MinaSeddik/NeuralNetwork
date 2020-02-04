@@ -55,6 +55,10 @@ public class Vector extends Tensor {
         return Arrays.stream(collection).max().getAsDouble();
     }
 
+    public double average() {
+        return Arrays.stream(collection).average().getAsDouble();
+    }
+
     public int argMaxIndex() {
         int maxIndex = 0;
         for (int i = 1; i < collection.length; i++) {
@@ -91,7 +95,7 @@ public class Vector extends Tensor {
 
     public void divide(double val) {
         for (int i = 0; i < collection.length; i++) {
-            collection[i]/= val;
+            collection[i] /= val;
         }
     }
 }

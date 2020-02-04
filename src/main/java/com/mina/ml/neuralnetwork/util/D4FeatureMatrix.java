@@ -30,6 +30,58 @@ public class D4FeatureMatrix extends D4Matrix {
         return new D4Matrix(result);
     }
 
+    public D4Matrix calculateOutputPrime(D4Matrix dError, D4Matrix X, D4Matrix weight, Pair<Integer, Integer> kernelSize,
+                                         int filters, int padding) {
+        int numberOfSamples = X.getDimensionCount();
+        int h = X.getRowCount() + 2 * padding;
+        int w = X.getColumnCount() + 2 * padding;
+        int channels = X.getDepthCount();
+        int kernalHeight = kernelSize.getValue0();
+        int kernalWidth = kernelSize.getValue1();
+
+        int zeroPaddingH = kernalHeight - 1;
+        int zeroPaddingW = kernalWidth - 1;
+
+        double[][][][] output = dError.addZeroPadding(zeroPaddingH, zeroPaddingW).getMatrix();
+        double[][][][] weightT = weight.transpose().getMatrix();
+
+        double[][][][] result = new double[numberOfSamples][channels][h][w];
+        parallelizeOperation((start, end) -> calculateOutputPrime(result, output, X, weightT, kernelSize,
+                filters, padding, start, end));
+
+        return new D4Matrix(result);
+    }
+
+    private void calculateOutputPrime(double[][][][] result, double[][][][] output, D4Matrix X, double[][][][] weightT,
+                                      Pair<Integer, Integer> kernelSize,
+                                      int filters, int padding,
+                                      int startIndex, int endIndex) {
+
+        int h = X.getRowCount() + 2 * padding;
+        int w = X.getColumnCount() + 2 * padding;
+        int kernalHeight = kernelSize.getValue0();
+        int kernalWidth = kernelSize.getValue1();
+        int channels = X.getDepthCount();
+
+        for (int n = startIndex; n < endIndex; n++) {
+            for (int f = 0; f < filters; f++) {
+                for (int i = 0; i < h; i++) {
+                    for (int j = 0; j < w; j++) {
+                        for (int k = 0; k < kernalHeight; k++) {
+                            for (int l = 0; l < kernalWidth; l++) {
+                                for (int c = 0; c < channels; c++) {
+                                    double dx = i + k < h && j + l < w ? output[n][f][i + k][j + l] : 0d;
+                                    result[n][c][i][j] += dx * weightT[f][c][k][l];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
     private void buildFeatures(double[][][][] result, D4Matrix X, D4Matrix weight, Pair<Integer, Integer> kernelSize,
                                int filters, int outputHeight, int outputWidth, Vector bias,
                                int startIndex, int endIndex) {

@@ -149,7 +149,7 @@ public class Sequential extends Model {
                 Pair<List<? extends Object>, List<? extends Object>> batch = partitioner.getNext();
 //                Matrix xBatch = new Matrix(batch.getValue0());
 //                Matrix yBatch = new Matrix(batch.getValue1());
-//                System.out.println("Xn = " + batch.getValue0().size() + ", Yn = " + batch.getValue1().size());
+                System.out.println("batch " + batchCount);
 
                 Tensor xBatch = Tensor.getTensor(batch.getValue0());
                 Tensor yBatch = Tensor.getTensor(batch.getValue1());
