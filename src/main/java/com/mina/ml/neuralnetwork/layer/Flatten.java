@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
-public class Flatten extends Layerrr {
+public class Flatten extends Layer {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Flatten.class);

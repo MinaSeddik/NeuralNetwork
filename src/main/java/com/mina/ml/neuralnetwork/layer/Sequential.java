@@ -10,6 +10,7 @@ import dnl.utils.text.table.TextTable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class Sequential extends Model {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Sequential.class);
 
-    private List<Layerrr> layers = new ArrayList<>();
+    private List<Layer> layers = new ArrayList<>();
     private LossFunction lossFunction;
 
     private Optimizer optimizer;
@@ -36,14 +37,21 @@ public class Sequential extends Model {
     public Sequential() {
     }
 
-    public Sequential(Layerrr[] array) {
+    public Sequential(Layer[] array) {
         Arrays.stream(array).forEach(e -> add(e));
     }
 
     @Override
-    public void add(Layerrr layer) {
-        Layerrr prev = layers.size() > 0 ? layers.get(layers.size() - 1) : null;
-        int lastIndex = layers.size() > 0 ? layers.get(layers.size() - 1).getIndex() + 1 : 1;
+    public void add(Layer layer) {
+        Layer prev = layers.size() > 0 ? layers.get(layers.size() - 1) : null;
+
+        String packageName = this.getClass().getPackage().getName();
+        Reflections reflections = new Reflections(packageName);
+        Set<Class<? extends Layer>> classes = reflections.getSubTypesOf(Layer.class);
+        Map<String, Integer> result = classes.stream().collect(Collectors.toMap(Class::getSimpleName, x -> 0));
+        layers.stream().forEach(l -> result.put(l.getClass().getSimpleName(), result.get(l.getClass().getSimpleName())+1));
+
+        int lastIndexType = result.get(layer.getClass().getSimpleName()) + 1;
 
         // link up this layer
         if (null != prev) {
@@ -51,7 +59,7 @@ public class Sequential extends Model {
             layer.setInputShape(prev.getOutputShape());
         }
         layer.setPrevious(prev);
-        layer.setIndex(lastIndex);
+        layer.setIndex(lastIndexType);
 
         layers.add(layer);
     }
@@ -122,8 +130,8 @@ public class Sequential extends Model {
                     int epochs, Verbosity verbosity, List<ModelCheckpoint> callbacks) {
 
         Stopwatch stopwatch = Stopwatch.createStarted();
-        Layerrr inputLayer = layers.get(0);
-        Layerrr outputLayer = layers.get(layers.size() - 1);
+        Layer inputLayer = layers.get(0);
+        Layer outputLayer = layers.get(layers.size() - 1);
         Splitter splitter = new Splitter(x, y, shuffle);
         for (int epoch = 1; epoch <= epochs; epoch++) {
 
@@ -149,7 +157,7 @@ public class Sequential extends Model {
                 Pair<List<? extends Object>, List<? extends Object>> batch = partitioner.getNext();
 //                Matrix xBatch = new Matrix(batch.getValue0());
 //                Matrix yBatch = new Matrix(batch.getValue1());
-                System.out.println("batch " + batchCount);
+//                System.out.println("batch " + batchCount);
 
                 Tensor xBatch = Tensor.getTensor(batch.getValue0());
                 Tensor yBatch = Tensor.getTensor(batch.getValue1());
@@ -193,7 +201,7 @@ public class Sequential extends Model {
     @Override
     public Pair<Double, Double> evaluate(List<? extends Object> data, List<? extends Object> labels) {
 
-        Layerrr inputLayer = layers.get(0);
+        Layer inputLayer = layers.get(0);
 
         double loss = 0, acc = 0;
         Partitioner partitioner = new Partitioner(data, labels, 32);
@@ -239,7 +247,7 @@ public class Sequential extends Model {
 
     @Override
     public List<double[]> predict(List<double[]> x) {
-        Layerrr inputLayer = layers.get(0);
+        Layer inputLayer = layers.get(0);
 
         Matrix input = new Matrix(x);
         Matrix output = (Matrix) inputLayer.forwardPropagation(input);
@@ -249,7 +257,7 @@ public class Sequential extends Model {
 
     @Override
     public List<Integer> predictClasses(List<double[]> x) {
-        Layerrr inputLayer = layers.get(0);
+        Layer inputLayer = layers.get(0);
 
         Matrix input = new Matrix(x);
         Matrix output = (Matrix) inputLayer.forwardPropagation(input);

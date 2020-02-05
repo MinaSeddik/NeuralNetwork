@@ -41,18 +41,26 @@ public class MNistConvolutionalNeuralNetwork {
         // Build Convolutional Neural Network
         Tuple inputShape = new Quartet<>(0, MNIST_IMAGE_CHANNELS, MIST_IMAGE_HEIGHT, MNIST_IMAGE_WIDTH);
         Pair<Integer, Integer> kernal = new Pair<>(3, 3);
-        Pair<Integer, Integer> poolsize = new Pair<>(3, 3);
+        Pair<Integer, Integer> poolsize = new Pair<>(2, 2);
+
+//        Model model = new Sequential();
+//        model.add(new Conv2D(64, inputShape, "relu", kernal));
+//        model.add(new Conv2D(32,"relu", kernal));
+//        model.add(new MaxPooling2D(poolsize));
+//        model.add(new Flatten());
+//        model.add(new Dense(128 ,"relu"));
+//        model.add(new Dense(10 ,"softmax"));
 
         Model model = new Sequential();
-        model.add(new Conv2D(64, inputShape, "relu", kernal));
-        model.add(new Conv2D(32,"relu", kernal));
-        model.add(new MaxPooling2D(poolsize));
+        model.add(new Conv2D(10, inputShape, "relu", kernal));
+//        model.add(new MaxPooling2D(poolsize));
         model.add(new Flatten());
-        model.add(new Dense(128 ,"relu"));
+        model.add(new Dense(64 ,"relu"));
         model.add(new Dense(10 ,"softmax"));
 
         model.summary(line -> System.out.println(line));
 
+//        double learningRate = 0.1;
         double learningRate = 0.001;
         Optimizer optimizer = new Optimizer(learningRate);
         model.compile(optimizer, "categorical_crossentropy", "");
@@ -64,8 +72,6 @@ public class MNistConvolutionalNeuralNetwork {
 //        System.out.println(String.format("Total Memory: %.4f Gigs" ,Runtime.getRuntime().totalMemory()/(1024d*1024d*1024d)));
         model.fit(xTrain, yTrain, 0.1f, true, 128, 300,
                 Verbosity.VERBOSE, callbacksList);
-
-        System.exit(0);
 
         Pair<Double, Double> testStats = model.evaluate(xTest, yTest);
         double test_acc = testStats.getValue1();

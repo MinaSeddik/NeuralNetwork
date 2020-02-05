@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by menai on 2019-01-31.
  */
-public class OutputLayer extends Layer {
+public class OutputLayer extends Layer2 {
 
     private final static Logger logger = LoggerFactory.getLogger(OutputLayer.class);
 

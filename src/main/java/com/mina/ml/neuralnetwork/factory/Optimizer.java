@@ -1,6 +1,6 @@
 package com.mina.ml.neuralnetwork.factory;
 
-import com.mina.ml.neuralnetwork.layer.Layerrr;
+import com.mina.ml.neuralnetwork.layer.Layer;
 import com.mina.ml.neuralnetwork.layer.Verbosity;
 import com.mina.ml.neuralnetwork.lossfunction.LossFunction;
 import com.mina.ml.neuralnetwork.util.Matrix;
@@ -34,7 +34,7 @@ public class Optimizer implements Serializable {
         this.verbosity = verbosity;
     }
 
-    public Pair<Double, Double> optimize(Layerrr inputLayer, Layerrr outputLayer, LossFunction lossFunction, Tensor input, Tensor labels) {
+    public Pair<Double, Double> optimize(Layer inputLayer, Layer outputLayer, LossFunction lossFunction, Tensor input, Tensor labels) {
 
         Matrix yPrime = (Matrix) inputLayer.forwardPropagation(input);
 

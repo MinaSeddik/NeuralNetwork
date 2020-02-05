@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 // https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
-public class Conv2D extends Layerrr {
+public class Conv2D extends Layer {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Conv2D.class);
@@ -97,18 +97,12 @@ public class Conv2D extends Layerrr {
     @Override
     public Tensor forwardPropagation(Tensor inputTensor) {
 
-        // Reference: https://towardsdatascience.com/backpropagation-in-a-convolutional-layer-24c8d64d8509
-
-//        System.out.println("Conv2D inputShape " + inputShape);
-
-
         input = (D4Matrix) inputTensor;
+
         D4FeatureMatrix features = new D4FeatureMatrix(input.getDimensionCount());
         A = features.buildFeatures(input, weight, kernelSize, filters, getOutputHeight(), getOutputWidth(), bias);
-//        System.out.println("A shape = " + A.shape());
 
         D4Matrix Z = activationFunction.activate(A);
-//        System.out.println("Conv2D Z shape = " + Z.shape());
 
         return Objects.isNull(nextLayer) ? Z : nextLayer.forwardPropagation(Z);
     }

@@ -2,7 +2,6 @@ package com.mina.ml.neuralnetwork.layer;
 
 import com.mina.ml.neuralnetwork.util.FilesUtil;
 import com.mina.ml.neuralnetwork.util.Tensor;
-import com.mina.ml.neuralnetwork.util.WeightMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +45,7 @@ public class ModelCheckpoint {
         this.mode = mode;
     }
 
-    public void handle(Map<String, Object> params, List<? extends Layerrr> layers) {
+    public void handle(Map<String, Object> params, List<? extends Layer> layers) {
         double currentValue = (double) params.get(monitor);
         if (lastEpochValue == null) {
             lastEpochValue = currentValue;
@@ -59,7 +58,7 @@ public class ModelCheckpoint {
             // save the weights to the file specified
             String file = getFileName(params);
             Map<Integer, Tensor> modelWeights = layers.stream()
-                    .collect(Collectors.toMap(Layerrr::getIndex, Layerrr::getWeights));
+                    .collect(Collectors.toMap(Layer::getIndex, Layer::getWeights));
             FilesUtil.serializeData(file, modelWeights);
 
             System.out.println(String.format("Epoch %d: %s improved from %.4f to %.4f, saving model to %s",

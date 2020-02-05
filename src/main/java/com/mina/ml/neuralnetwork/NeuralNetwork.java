@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.mina.ml.neuralnetwork.factory.LossFunctionFactory;
 import com.mina.ml.neuralnetwork.layer.HiddenLayer;
 import com.mina.ml.neuralnetwork.layer.InputLayer;
-import com.mina.ml.neuralnetwork.layer.Layer;
+import com.mina.ml.neuralnetwork.layer.Layer2;
 import com.mina.ml.neuralnetwork.layer.OutputLayer;
 import com.mina.ml.neuralnetwork.lossfunction.LossFunction;
 import org.slf4j.Logger;
@@ -28,8 +28,8 @@ public class NeuralNetwork {
     private static final int DEFAULT_BATCH_SIZE = 512;
     private static final int DEFAULT_MAX_EPOCH = 1000000;
 
-    private Layer inputLayer;
-    private Layer outputLayer;
+    private Layer2 inputLayer;
+    private Layer2 outputLayer;
 
     private List<double[]> x_train;
     private List<double[]> y_train;
@@ -63,7 +63,7 @@ public class NeuralNetwork {
 
         logger.debug("Setup Input Layer with Num of Features = {}", configuration.getNumOfFeatures());
         inputLayer = new InputLayer("Input Layer", configuration.getNumOfFeatures());
-        Layer prevLayer = inputLayer;
+        Layer2 prevLayer = inputLayer;
 
         for (int i = 1; i <= configuration.getNumOfHiddenLayers(); i++) {
 
@@ -72,7 +72,7 @@ public class NeuralNetwork {
                     i, prevLayer.getNumberOfOutputs(), configuration.getNumOfNodes(i),
                     configuration.getActivationFunction(i), configuration.getLearningRate());
 
-            Layer layer = new HiddenLayer("Hidden Layer [" + i + "]", prevLayer.getNumberOfOutputs(),
+            Layer2 layer = new HiddenLayer("Hidden Layer [" + i + "]", prevLayer.getNumberOfOutputs(),
                     configuration.getNumOfNodes(i),
                     configuration.getActivationFunction(i), configuration.getLearningRate());
 

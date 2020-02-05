@@ -1,9 +1,6 @@
 package com.mina.ml.neuralnetwork.layer;
 
-import com.mina.ml.neuralnetwork.util.D4Matrix;
-import com.mina.ml.neuralnetwork.util.D4WeightMatrix;
-import com.mina.ml.neuralnetwork.util.Matrix;
-import com.mina.ml.neuralnetwork.util.Tensor;
+import com.mina.ml.neuralnetwork.util.*;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
 import org.javatuples.Tuple;
@@ -12,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
-public class MaxPooling2D extends Layerrr {
+public class MaxPooling2D extends Layer {
 
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(MaxPooling2D.class);
@@ -75,14 +72,14 @@ public class MaxPooling2D extends Layerrr {
 
     private Matrix applyPooling(int dim, int depth) {
         Matrix matrix = input.getSubMatrix(dim, depth);
-        int height = matrix.getRowCount() / 2;
-        int width = matrix.getColumnCount() / 2;
+        int height = matrix.getRowCount() / poolSize.getValue0();
+        int width = matrix.getColumnCount() / poolSize.getValue1();
 
         double[][] result = new double[height][width];
         double[][] mat = matrix.getMatrix();
         int r = 0, c = 0;
-        for (int i = 0; i < mat.length; i += poolSize.getValue0()) {
-            for (int j = 0; j < mat[0].length; j += poolSize.getValue1()) {
+        for (int i = 0; i + poolSize.getValue0() < mat.length; i += poolSize.getValue0()) {
+            for (int j = 0; j + poolSize.getValue1() < mat[0].length; j += poolSize.getValue1()) {
                 result[r][c++] = applyMaxPooling(mat, i, j, dim, depth);
             }
             r++;
@@ -147,8 +144,8 @@ public class MaxPooling2D extends Layerrr {
         double[][] result = new double[weightMatrix.length][weightMatrix[0].length];
 
         Pair<Integer, Integer> indices;
-        for (int i = 0; i < weightMatrix.length; i += poolSize.getValue0()) {
-            for (int j = 0; j < weightMatrix[i].length; j += poolSize.getValue1()) {
+        for (int i = 0; i + poolSize.getValue0()< weightMatrix.length; i += poolSize.getValue0()) {
+            for (int j = 0; j + poolSize.getValue1() < weightMatrix[i].length; j += poolSize.getValue1()) {
                 indices = applyReverseMaxPooling(weightMatrix, i, j);
                 result[indices.getValue0()][indices.getValue1()] = costMatrix[indices.getValue0() / poolSize.getValue0()][indices.getValue1() / poolSize.getValue1()];
             }

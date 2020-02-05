@@ -15,7 +15,7 @@ public abstract class Model implements Serializable {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Model.class);
 
-    public abstract void add(Layerrr layer);
+    public abstract void add(Layer layer);
 
     public abstract void summary(Consumer consumer);
 
