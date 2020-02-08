@@ -8,7 +8,6 @@ import org.javatuples.Quartet;
 import org.javatuples.Tuple;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 public class MNistConvolutionalNeuralNetwork {
@@ -19,7 +18,7 @@ public class MNistConvolutionalNeuralNetwork {
 
     private static final String MNIST_DATA_DIR = "mnist/models/";
     private static final String MNIST_MODEL_FILE = "cnn_model.bin";
-    private static String fileName="cnn_weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
+    private static String fileName = "cnn_weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
 
     public static void main(String[] args) {
 
@@ -38,30 +37,22 @@ public class MNistConvolutionalNeuralNetwork {
         normalize(xTrain);
         normalize(xTest);
 
-        // Build Convolutional Neural Network
+        // Build Convolution Neural Network
         Tuple inputShape = new Quartet<>(0, MNIST_IMAGE_CHANNELS, MIST_IMAGE_HEIGHT, MNIST_IMAGE_WIDTH);
         Pair<Integer, Integer> kernal = new Pair<>(3, 3);
         Pair<Integer, Integer> poolsize = new Pair<>(2, 2);
 
-//        Model model = new Sequential();
-//        model.add(new Conv2D(64, inputShape, "relu", kernal));
-//        model.add(new Conv2D(32,"relu", kernal));
-//        model.add(new MaxPooling2D(poolsize));
-//        model.add(new Flatten());
-//        model.add(new Dense(128 ,"relu"));
-//        model.add(new Dense(10 ,"softmax"));
-
         Model model = new Sequential();
-        model.add(new Conv2D(10, inputShape, "relu", kernal));
-//        model.add(new MaxPooling2D(poolsize));
+        model.add(new Conv2D(32, inputShape, "relu", kernal));
+        model.add(new MaxPooling2D(poolsize));
         model.add(new Flatten());
-        model.add(new Dense(64 ,"relu"));
-        model.add(new Dense(10 ,"softmax"));
+        model.add(new Dense(64, "relu"));
+        model.add(new Dense(10, "softmax"));
 
         model.summary(line -> System.out.println(line));
 
-//        double learningRate = 0.1;
-        double learningRate = 0.001;
+        double learningRate = 0.1;
+//        double learningRate = 0.001;
         Optimizer optimizer = new Optimizer(learningRate);
         model.compile(optimizer, "categorical_crossentropy", "");
 
@@ -94,8 +85,10 @@ public class MNistConvolutionalNeuralNetwork {
 
     private static void normalize(double[][][] array) {
         for (int i = 0; i < array.length; i++) {
-            for (int j = 0; j < array.length; j++) {
-                array[0][i][j] /= 255d;
+            for (int j = 0; j < array[i].length; j++) {
+                for (int k = 0; k < array[i][j].length; k++) {
+                    array[i][j][k] /= 255d;
+                }
             }
         }
     }

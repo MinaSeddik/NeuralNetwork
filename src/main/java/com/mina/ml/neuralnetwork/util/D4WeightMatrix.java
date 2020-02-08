@@ -57,6 +57,8 @@ public class D4WeightMatrix extends D4Matrix {
     }
 
     private void initializeRandom(Random random, double minRange, double maxRange, int startIndex, int endIndex) {
+
+//        System.out.println("startIndex = " + startIndex + " and endIndex = " + endIndex);
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[i].length; j++) {
                 for (int k = 0; k < collection[i][j].length; k++) {

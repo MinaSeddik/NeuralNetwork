@@ -33,11 +33,15 @@ public abstract class TensorParallelizer implements Serializable {
         }
 
         int batchSize = getSize() / NUM_OF_THREADS;
+//        System.out.println("getSize() = " +getSize());
+//        System.out.println("NUM_OF_THREADS = " + NUM_OF_THREADS);
+//        System.out.println("batchSize = " + batchSize);
+
         List<Future<?>> futures = IntStream.range(0, NUM_OF_THREADS)
                 .mapToObj(i -> {
 
                     int startIndex = i * batchSize;
-                    int endIndex = i == NUM_OF_THREADS ? getSize() : i * batchSize + batchSize;
+                    int endIndex = i == (NUM_OF_THREADS-1) ? getSize() : i * batchSize + batchSize;
 
                     Future<?> future = executor.submit(() -> tensorConsumer.accept(startIndex, endIndex));
 

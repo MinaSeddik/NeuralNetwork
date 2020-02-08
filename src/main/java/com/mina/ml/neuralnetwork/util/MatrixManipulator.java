@@ -310,6 +310,21 @@ public class MatrixManipulator {
         logger.info(matrixAsString.toString());
     }
 
+    public static void printMatrix(String label, double[][][] matrix) {
+        StringBuffer matrixAsString = new StringBuffer(label + "\n");
+
+        for (int x = 0; x < matrix.length; x++) {
+            for (int y = 0; y < matrix[x].length; y++) {
+                for (int z = 0; z < matrix[x][y].length; z++) {
+                    matrixAsString.append(String.format("%.2f ", matrix[x][y][z]));
+                }
+                matrixAsString.append("\n");
+            }
+            matrixAsString.append("\n\n");
+        }
+        logger.info(matrixAsString.toString());
+    }
+
     public static String simulate(String label, int rows, int cols, char r, char c) {
         StringBuffer matrixAsString = new StringBuffer(label + "\n");
 
@@ -352,7 +367,7 @@ public class MatrixManipulator {
 
         for (int i = 0; i < matrix1.length; i++) {
             for (int j = 0; j < matrix1[0].length; j++) {
-                if(matrix1[i][j] != matrix2[i][j]){
+                if (matrix1[i][j] != matrix2[i][j]) {
                     return false;
                 }
             }

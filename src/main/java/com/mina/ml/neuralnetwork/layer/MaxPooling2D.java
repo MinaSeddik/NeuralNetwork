@@ -53,7 +53,7 @@ public class MaxPooling2D extends Layer {
                 input.getRowCount(), input.getColumnCount());
 
         int outputHeight = input.getRowCount() / poolSize.getValue0();
-        int outputWidth = input.getColumnCount() / poolSize.getValue0();
+        int outputWidth = input.getColumnCount() / poolSize.getValue1();
 
         Y = new D4Matrix(input.getDimensionCount(), input.getDepthCount(), outputHeight, outputWidth);
 //        Pair<Integer, Integer> maxIndices = new Pair<>(0, 0);

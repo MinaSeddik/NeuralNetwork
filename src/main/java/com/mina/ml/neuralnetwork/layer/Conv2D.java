@@ -102,6 +102,19 @@ public class Conv2D extends Layer {
         D4FeatureMatrix features = new D4FeatureMatrix(input.getDimensionCount());
         A = features.buildFeatures(input, weight, kernelSize, filters, getOutputHeight(), getOutputWidth(), bias);
 
+//        System.out.println("input shape = " + input.shape());
+//        System.out.println("weight shape = " + weight.shape());
+//        System.out.println("A shape = " + A.shape());
+//        D3Matrix firstInput = input.getDimension(0);
+//        D3Matrix firstWeight = weight.getDimension(9);
+//        Matrix firstOut = A.getSubMatrix(0, 9);
+//        MatrixManipulator.printMatrix("First Input", firstInput.getMatrix());
+//        MatrixManipulator.printMatrix("First Weight", firstWeight.getMatrix());
+//        MatrixManipulator.printMatrix("First Out Feature map", firstOut.getMatrix());
+//
+//
+//        System.exit(0);
+
         D4Matrix Z = activationFunction.activate(A);
 
         return Objects.isNull(nextLayer) ? Z : nextLayer.forwardPropagation(Z);
@@ -211,6 +224,14 @@ public class Conv2D extends Layer {
     @Override
     public void updateWeight(double learningRate) {
         weight.updateWeights(deltaWeight, learningRate);
+//        MatrixManipulator.printMatrix("", deltaBias.toMatrix().getMatrix());
+
+        // todo to be better implemented using BiasVector
+        double[] biasArray = bias.asArray();
+        for(int i=0;i<biasArray.length;i++){
+            biasArray[i]-= learningRate * biasArray[i];
+        }
+
         if (!Objects.isNull(nextLayer)) {
             nextLayer.updateWeight(learningRate);
         }
