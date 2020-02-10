@@ -8,9 +8,10 @@ import org.javatuples.Quartet;
 import org.javatuples.Tuple;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
-public class MNistConvolutionalNeuralNetwork {
+public class MNistConvolutionalNeuralNetwork2 {
 
     private static final int MNIST_IMAGE_CHANNELS = 1;
     private static final int MIST_IMAGE_HEIGHT = 28;
@@ -21,10 +22,6 @@ public class MNistConvolutionalNeuralNetwork {
     private static String fileName = "cnn_weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
 
     public static void main(String[] args) {
-
-        String dirPath = MNistNeuralNetwork2.class.getClassLoader()
-                .getResource(MNIST_DATA_DIR)
-                .getFile();
 
         MNistLoader mnistLoader = new MNistLoader();
         Quartet<List<double[][][]>, List<double[]>, List<double[][][]>, List<double[]>> dataset = mnistLoader.loadMNistDataSet2();
@@ -37,46 +34,25 @@ public class MNistConvolutionalNeuralNetwork {
         normalize(xTrain);
         normalize(xTest);
 
-        // Build Convolution Neural Network
-        Tuple inputShape = new Quartet<>(0, MNIST_IMAGE_CHANNELS, MIST_IMAGE_HEIGHT, MNIST_IMAGE_WIDTH);
-        Pair<Integer, Integer> kernal = new Pair<>(3, 3);
-        Pair<Integer, Integer> poolsize = new Pair<>(2, 2);
+        // save the model
+        String dirPath = MNistConvolutionalNeuralNetwork2.class.getClassLoader()
+                .getResource(MNIST_DATA_DIR)
+                .getFile();
+        String modelFilePath = new File(dirPath, MNIST_MODEL_FILE).getAbsolutePath();
 
-        Model model = new Sequential();
-        model.add(new Conv2D(32, inputShape, "relu", kernal));
-        model.add(new MaxPooling2D(poolsize));
-        model.add(new Flatten());
-        model.add(new Dense(64, "relu"));
-        model.add(new Dense(10, "softmax"));
-
+        Model model = Model.load(modelFilePath);
         model.summary(line -> System.out.println(line));
-
-//        double learningRate = 0.1;
-        double learningRate = 0.001;
-        Optimizer optimizer = new Optimizer(learningRate);
-        model.compile(optimizer, "categorical_crossentropy", "");
 
 //        String filePath = new File(dirPath, fileName).getAbsolutePath();
 //        List<ModelCheckpoint> callbacksList = Arrays.asList(new ModelCheckpoint(filePath));
-        List<ModelCheckpoint> callbacksList = null;
-
-//        System.out.println(String.format("Total Memory: %.4f Gigs" ,Runtime.getRuntime().totalMemory()/(1024d*1024d*1024d)));
-        model.fit(xTrain, yTrain, 0.1f, true, 128, 300,
-                Verbosity.VERBOSE, callbacksList);
+        model.fit(xTrain, yTrain, 0.1f, true, 128, 300, Verbosity.VERBOSE, null);
 
         Pair<Double, Double> testStats = model.evaluate(xTest, yTest);
         double test_acc = testStats.getValue1();
         System.out.println(String.format("Test accuracy: %.2f%%", (test_acc * 100)));
 
-        // save the model
-        String modelFilePath = new File(dirPath, MNIST_MODEL_FILE).getAbsolutePath();
+        // finally save back the model after training
         model.save(modelFilePath);
-
-        // load the model
-        Model loadedModel = Model.load(modelFilePath);
-        loadedModel.summary(line -> System.out.println(line));
-
-        System.out.println("Total Memory:" + Runtime.getRuntime().totalMemory());
     }
 
     private static void normalize(List<double[][][]> list) {

@@ -1,7 +1,6 @@
 package com.mina.examples;
 
 import com.mina.examples.mnist.MNistLoader;
-import com.mina.examples.mnist.MNistTraining;
 import com.mina.ml.neuralnetwork.layer.Model;
 import com.mina.ml.neuralnetwork.layer.ModelCheckpoint;
 import com.mina.ml.neuralnetwork.layer.Verbosity;
@@ -16,7 +15,7 @@ public class MNistNeuralNetwork2 {
 
     private static final String MNIST_DATA_DIR = "mnist/models";
     private static final String MNIST_MODEL_FILE = "nn_model.bin";
-    private static String fileName="nn_weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
+    private static String fileName = "nn_weights-improvement-{epoch:02d}-{val_accuracy:.2f}.bin";
 
     public static void main(String[] args) {
 
