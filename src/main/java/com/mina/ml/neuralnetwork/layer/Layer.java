@@ -13,8 +13,6 @@ public abstract class Layer implements Serializable {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Layer.class);
 
-
-
     protected int layerIndex;
 
     protected Layer prevLayer;
@@ -24,7 +22,6 @@ public abstract class Layer implements Serializable {
     protected NetworkLayerType networkLayerType = NetworkLayerType.OUTPUT;
 
     protected ActivationFunction activationFunction;
-
 
     public void setIndex(int index) {
         layerIndex = index;

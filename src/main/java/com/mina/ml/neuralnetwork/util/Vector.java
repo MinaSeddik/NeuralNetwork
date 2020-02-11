@@ -1,6 +1,7 @@
 package com.mina.ml.neuralnetwork.util;
 
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +14,7 @@ public class Vector extends Tensor {
     private static final long serialVersionUID = 6529685098267757690L;
     private final static Logger logger = LoggerFactory.getLogger(Vector.class);
 
-    //    private double[] vector;
-    private double[] collection;
+    protected double[] collection;
 
     public Vector(int count) {
         collection = new double[count];
@@ -97,5 +97,40 @@ public class Vector extends Tensor {
         for (int i = 0; i < collection.length; i++) {
             collection[i] /= val;
         }
+    }
+
+    public Matrix reshape(Pair<Integer, Integer> shape) {
+        int n = shape.getValue0();
+        int m = shape.getValue1();
+        assert n * m == collection.length;
+
+        int x = 0;
+        double[][] result = new double[n][m];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                result[i][j] = collection[x++];
+            }
+        }
+
+        return new Matrix(result);
+    }
+
+    public D3Matrix reshape(Triplet<Integer, Integer, Integer> shape) {
+        int n = shape.getValue0();
+        int m = shape.getValue1();
+        int l = shape.getValue2();
+        assert n * m * l == collection.length;
+
+        int x = 0;
+        double[][][] result = new double[n][m][l];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                for (int k = 0; k < l; k++) {
+                    result[i][j][k] = collection[x++];
+                }
+            }
+        }
+
+        return new D3Matrix(result);
     }
 }

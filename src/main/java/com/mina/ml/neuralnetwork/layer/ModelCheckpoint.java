@@ -57,6 +57,8 @@ public class ModelCheckpoint {
                 (mode.equals(MAX_MODE) && currentValue > lastEpochValue)) {
             // save the weights to the file specified
             String file = getFileName(params);
+
+            // todo it is a series bug as a layer may have more than 1 weight matrix and bias
             Map<Integer, Tensor> modelWeights = layers.stream()
                     .collect(Collectors.toMap(Layer::getIndex, Layer::getWeights));
             FilesUtil.serializeData(file, modelWeights);

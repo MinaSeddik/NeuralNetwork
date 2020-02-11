@@ -38,14 +38,16 @@ public class Optimizer implements Serializable {
 
         Matrix yPrime = (Matrix) inputLayer.forwardPropagation(input);
 
+
+
         Matrix y = (Matrix) labels;
         double loss = lossFunction.meanErrorCost(y, yPrime);
         double acc = lossFunction.calculateAccuracy(y, yPrime);
 
         Matrix errorCostPrime = lossFunction.errorCostPrime(y, yPrime);
-
         outputLayer.backPropagation(errorCostPrime);
 
+        System.exit(0);
         inputLayer.updateWeight(learningRate);
 
         return new Pair<>(loss, acc);

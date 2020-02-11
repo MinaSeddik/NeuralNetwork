@@ -107,6 +107,15 @@ public class Matrix extends Tensor {
         return new Matrix(result);
     }
 
+    public Matrix duplicateRow(int n) {
+        assert collection.length == 1;
+
+        double[][] result = new double[n][collection[0].length];
+        parallelizeOperation((start, end) -> duplicateRow(result, start, end));
+
+        return new Matrix(result);
+    }
+
     public Matrix apply(Function<Double, Double> function) {
         double[][] result = new double[collection.length][collection[0].length];
         parallelizeOperation((start, end) -> apply(result, function, start, end));
@@ -251,6 +260,14 @@ public class Matrix extends Tensor {
         }
     }
 
+    private void duplicateRow(double[][] result, int startIndex, int endIndex) {
+        for (int row = startIndex; row < endIndex; row++) {
+            for (int j = 0; j < collection[0].length; j++) {
+                result[row][j] = collection[0][j];
+            }
+        }
+    }
+
     private void transpose(double[][] result, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
@@ -339,5 +356,6 @@ public class Matrix extends Tensor {
         }
         logger.info(matrixAsString.toString());
     }
+
 
 }

@@ -28,10 +28,7 @@ public class Dense extends Layer {
 
     private Matrix input;
     private Matrix A;
-//    private Matrix Z;
 
-//    private int numOfInputs;
-//    private int numOfOutputs;
     private String activationFunctionStr;
 
     public Dense(int units, Tuple inputShape, String activation) {

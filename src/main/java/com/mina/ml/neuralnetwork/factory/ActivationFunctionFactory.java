@@ -18,6 +18,7 @@ public class ActivationFunctionFactory {
     private final static Logger logger = LoggerFactory.getLogger(ActivationFunctionFactory.class);
 
     private Collection<String> activationFunctions = Arrays.asList(
+            VOID_ACTIVATION_FUNCTION,
             RELU_ACTIVATION_FUNCTION,
             SIGMOID_ACTIVATION_FUNCTION,
             TANSH_ACTIVATION_FUNCTION,
@@ -33,6 +34,9 @@ public class ActivationFunctionFactory {
 
         ActivationFunction activationFunction = null;
         switch (activationFunctionName.toLowerCase()) {
+            case VOID_ACTIVATION_FUNCTION:
+                activationFunction = new VoidActivation();
+                break;
             case RELU_ACTIVATION_FUNCTION:
                 activationFunction = new Relu();
                 break;

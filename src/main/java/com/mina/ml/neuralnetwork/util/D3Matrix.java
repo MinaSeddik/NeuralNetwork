@@ -121,4 +121,28 @@ public class D3Matrix extends Tensor {
         return new D3Matrix(copy);
     }
 
+    public Matrix getSubMatrix(int depth) {
+        return new Matrix(collection[depth]).clone();
+    }
+
+    public D3Matrix swapDepthAndColumns() {
+        int n = collection.length;
+        int m = collection[0].length;
+        int l = collection[0][0].length;
+        double[][][] result = new double[m][n][l];
+        parallelizeOperation((start, end) -> swapDepthAndColumns(result, start, end));
+
+        return new D3Matrix(result);
+    }
+
+    private void swapDepthAndColumns(double[][][] result, int startIndex, int endIndex) {
+
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[i].length; j++) {
+                for (int k = 0; k < collection[i][j].length; k++) {
+                    result[j][i][k] = collection[i][j][k];
+                }
+            }
+        }
+    }
 }

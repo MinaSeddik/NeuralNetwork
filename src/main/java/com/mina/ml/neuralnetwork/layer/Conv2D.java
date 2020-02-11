@@ -25,7 +25,7 @@ public class Conv2D extends Layer {
     private D4WeightMatrix weight;
     private D4Matrix deltaWeight;
 
-    private Vector bias;
+    private BiasVector bias;
     private Vector deltaBias;
 
     private D4Matrix input;
@@ -56,7 +56,7 @@ public class Conv2D extends Layer {
         activationFunctionStr = activation;
         this.kernelSize = kernelSize;
 
-        bias = new Vector(filters);
+        bias = new BiasVector(filters);
     }
 
     @Override
@@ -101,19 +101,6 @@ public class Conv2D extends Layer {
 
         D4FeatureMatrix features = new D4FeatureMatrix(input.getDimensionCount());
         A = features.buildFeatures(input, weight, kernelSize, filters, getOutputHeight(), getOutputWidth(), bias);
-
-//        System.out.println("input shape = " + input.shape());
-//        System.out.println("weight shape = " + weight.shape());
-//        System.out.println("A shape = " + A.shape());
-//        D3Matrix firstInput = input.getDimension(0);
-//        D3Matrix firstWeight = weight.getDimension(9);
-//        Matrix firstOut = A.getSubMatrix(0, 9);
-//        MatrixManipulator.printMatrix("First Input", firstInput.getMatrix());
-//        MatrixManipulator.printMatrix("First Weight", firstWeight.getMatrix());
-//        MatrixManipulator.printMatrix("First Out Feature map", firstOut.getMatrix());
-//
-//
-//        System.exit(0);
 
         D4Matrix Z = activationFunction.activate(A);
 
@@ -189,6 +176,7 @@ public class Conv2D extends Layer {
                 .parallelStream()
                 .map(v -> v.average())
                 .collect(Collectors.toList());
+
         deltaBias = new Vector(avgs.stream()
                 .mapToDouble(Double::doubleValue)
                 .toArray());
@@ -224,24 +212,20 @@ public class Conv2D extends Layer {
     @Override
     public void updateWeight(double learningRate) {
         weight.updateWeights(deltaWeight, learningRate);
-//        MatrixManipulator.printMatrix("", deltaBias.toMatrix().getMatrix());
-
-        // todo to be better implemented using BiasVector
-        double[] biasArray = bias.asArray();
-        for(int i=0;i<biasArray.length;i++){
-            biasArray[i]-= learningRate * biasArray[i];
-        }
+        bias.updateBias(deltaBias, learningRate);
 
         if (!Objects.isNull(nextLayer)) {
             nextLayer.updateWeight(learningRate);
         }
     }
 
+    // todo bug we have weight and bias
     @Override
     public Tensor getWeights() {
         return weight;
     }
 
+    // todo bug we have weight and bias
     @Override
     public void setWeights(Tensor weight) {
         this.weight = (D4WeightMatrix) weight;

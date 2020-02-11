@@ -22,6 +22,7 @@ public interface Constants {
     String BATCH_SIZE = "batch.size";
     String MAX_EPOCH = "epoch.max";
 
+    String VOID_ACTIVATION_FUNCTION = "void";
     String RELU_ACTIVATION_FUNCTION = "relu";
     String SIGMOID_ACTIVATION_FUNCTION = "sigmoid";
     String TANSH_ACTIVATION_FUNCTION = "tanh";

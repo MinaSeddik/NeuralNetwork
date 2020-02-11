@@ -162,6 +162,9 @@ public class Sequential extends Model {
                 Tensor xBatch = Tensor.getTensor(batch.getValue0());
                 Tensor yBatch = Tensor.getTensor(batch.getValue1());
 
+//                System.out.println(batch.getValue0().size());
+//                System.out.println(xBatch.getSize());
+
                 batchCount++;
                 batchStats = optimizer.optimize(inputLayer, outputLayer, lossFunction, xBatch, yBatch);
 //                System.out.println(batchCount + "/" + (x.size() / batchSize));
