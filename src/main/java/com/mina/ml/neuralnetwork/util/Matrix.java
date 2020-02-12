@@ -64,6 +64,13 @@ public class Matrix extends Tensor {
         return new Matrix(result);
     }
 
+    public Matrix subtract(Matrix mat) {
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> subtract(result, mat.getMatrix(), start, end));
+
+        return new Matrix(result);
+    }
+
     public double sumAllElements() {
         double[] vec = new double[collection.length];
         parallelizeOperation((start, end) -> sumAllElements(vec, start, end));
@@ -85,7 +92,6 @@ public class Matrix extends Tensor {
         return new Matrix(result);
     }
 
-
     public Matrix addColumn(double value) {
         double[][] result = new double[collection.length][collection[0].length + 1];
         parallelizeOperation((start, end) -> addColumn(result, value, start, end));
@@ -96,6 +102,13 @@ public class Matrix extends Tensor {
     public Matrix transpose() {
         double[][] result = new double[collection[0].length][collection.length];
         parallelizeOperation((start, end) -> transpose(result, start, end));
+
+        return new Matrix(result);
+    }
+
+    public Matrix square() {
+        double[][] result = new double[collection.length][collection[0].length];
+        parallelizeOperation((start, end) -> square(result, start, end));
 
         return new Matrix(result);
     }
@@ -217,6 +230,14 @@ public class Matrix extends Tensor {
         }
     }
 
+    private void subtract(double[][] result, double[][] mat, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[0].length; j++) {
+                result[i][j] = collection[i][j] - mat[i][j];
+            }
+        }
+    }
+
     private void sumAllElements(double[] vec, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[i].length; j++) {
@@ -239,6 +260,14 @@ public class Matrix extends Tensor {
         for (int i = startIndex; i < endIndex; i++) {
             for (int j = 0; j < collection[0].length; j++) {
                 result[i][j] = collection[i][j] / value;
+            }
+        }
+    }
+
+    private void square(double[][] result, int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            for (int j = 0; j < collection[0].length; j++) {
+                result[i][j] = collection[i][j] * collection[i][j];
             }
         }
     }
@@ -355,6 +384,16 @@ public class Matrix extends Tensor {
             matrixAsString.append(x < collection.length - 1 ? "\n" : "");
         }
         logger.info(matrixAsString.toString());
+    }
+
+
+    public Matrix buildMatrix(Vector v1, Vector v2, Vector v3, Vector v4) {
+        collection[0] = v1.asArray().clone();
+        collection[1] = v2.asArray().clone();
+        collection[2] = v3.asArray().clone();
+        collection[3] = v4.asArray().clone();
+
+        return this;
     }
 
 

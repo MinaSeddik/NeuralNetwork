@@ -4,6 +4,7 @@ import com.mina.ml.neuralnetwork.activationfunction.ActivationFunction;
 import com.mina.ml.neuralnetwork.activationfunction.Sigmoid;
 import com.mina.ml.neuralnetwork.activationfunction.Tansh;
 import com.mina.ml.neuralnetwork.factory.ActivationFunctionFactory;
+import com.mina.ml.neuralnetwork.util.Vector;
 import com.mina.ml.neuralnetwork.util.*;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
@@ -11,11 +12,13 @@ import org.javatuples.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 //Refrence: https://blog.aidangomez.ca/2016/04/17/Backpropogating-an-LSTM-A-Numerical-Example/
 //Refrence: https://medium.com/@aidangomez/let-s-do-this-f9b699de31d9
 //Refrence: https://datascience.stackexchange.com/questions/10615/number-of-parameters-in-an-lstm-model
+
 //Refrence: https://blog.aidangomez.ca/2016/04/17/Backpropogating-an-LSTM-A-Numerical-Example/
 
 
@@ -53,6 +56,12 @@ public class LSTM extends Layer {
     private Vector forgetGateDeltaBias;
     private BiasVector outputGateBias;
     private Vector outputGateDeltaBias;
+
+    private Map<Integer, Matrix> inputActivationMap = new HashMap<>();
+    private Map<Integer, Matrix> inputGateMap = new HashMap<>();
+    private Map<Integer, Matrix> forgetGateMap = new HashMap<>();
+    private Map<Integer, Matrix> outputGateMap = new HashMap<>();
+    private Map<Integer, Matrix> stateMap = new HashMap<>();
 
     private D3Matrix input;
     private Matrix A;
@@ -171,6 +180,13 @@ public class LSTM extends Layer {
         Matrix prevState = new Matrix(numberOfSamples, units);
         D3Matrix timeStepsX = reshapeInputPerTimeStep(input);
 
+        // some clean-up
+        inputActivationMap.clear();
+        inputGateMap.clear();
+        forgetGateMap.clear();
+        outputGateMap.clear();
+        stateMap.clear();
+
 //        System.out.println("input shape = " + input.shape());
 //        System.out.println("timeStepsX shape = " + timeStepsX.shape());
 
@@ -182,26 +198,35 @@ public class LSTM extends Layer {
             Matrix f = handleForgetGate(X, h_prev);
             Matrix o = handleOutputGate(X, h_prev);
 
-            System.out.println("a shape = " + a.shape());
-            System.out.println("i shape = " + i.shape());
+//            System.out.println("a shape = " + a.shape());
+//            System.out.println("i shape = " + i.shape());
             Matrix ai = a.elementWiseProduct(i);
 
-            System.out.println("f shape = " + f.shape());
-            System.out.println("state_prev shape = " + prevState.shape());
+//            System.out.println("f shape = " + f.shape());
+//            System.out.println("state_prev shape = " + prevState.shape());
             Matrix fs = f.elementWiseProduct(prevState);
 
-            Matrix currentState = ai.add(fs);
-            System.out.println("currentState shape = " + currentState.shape());
+            Matrix state = ai.add(fs);
+//            System.out.println("state shape = " + state.shape());
 
-            A = tanhActivation.activate(currentState).elementWiseProduct(o);
+            // save the gates and state for back-propagation
+            inputActivationMap.put(t, a);
+            inputGateMap.put(t, i);
+            forgetGateMap.put(t, f);
+            outputGateMap.put(t, o);
+            stateMap.put(t, state);
 
-            System.out.println("out shape = " + A.shape());
-            prevState = currentState;
+            A = tanhActivation.activate(state).elementWiseProduct(o);
+
+//            System.out.println("out shape = " + A.shape());
+            prevState = state;
             h_prev = A;
         }
 
+        System.out.println("will exit in forward ....");
+        System.exit(0);
+
         Matrix Z = activationFunction.activate(A);
-//        System.exit(0);
 
         return Objects.isNull(nextLayer) ? Z : nextLayer.forwardPropagation(Z);
     }
@@ -227,21 +252,132 @@ public class LSTM extends Layer {
         System.out.println("dE/dA shape = " + dE_dA.shape());
 
 //        D3Matrix timeStepsX = reshapeInputPerTimeStep(input);
+        int numberOfSamples = input.getDepthCount();
         int timeSteps = inputShape.getValue1();
         System.out.println("input shape shape = " + input.shape());
+        D3Matrix timeStepsX = reshapeInputPerTimeStep(input);
 
-//        https://blog.aidangomez.ca/2016/04/17/Backpropogating-an-LSTM-A-Numerical-Example/
-        for (int sample = 0; sample < input.getDepthCount(); sample++) {
-//            Vector cost = dE_dA.getRowAsVector(sample);
-//            dOut = cost + zero_previous;
-//            for (int t = timeSteps - 1; t >= 0; t--) {
-//            }
+        Matrix ones = new Matrix(numberOfSamples, units);
+        ones.initialize(1d);
+        Matrix zeros = new Matrix(numberOfSamples, units);
+        ones.initialize(0d);
+
+        Matrix cost = dE_dA;
+        Matrix futureOut = new Matrix(numberOfSamples, units);
+        Matrix futureState = new Matrix(numberOfSamples, units);
+        for (int t = timeSteps - 1; t >= 0; t--) {
+            Matrix dout = cost.add(futureOut);
+            Matrix temp = ones.subtract(tanhActivation.activate(stateMap.get(t)).square());
+            Matrix futureForget = forgetGateMap.containsKey(t + 1) ? forgetGateMap.get(t + 1) : zeros;
+
+            Matrix dState = dout.elementWiseProduct(outputGateMap.get(t))
+                    .elementWiseProduct(temp)
+                    .add(futureState.elementWiseProduct(futureForget));
+
+            Matrix dA = handleInputActivationPrime(dState, inputGateMap.get(t), inputActivationMap.get(t));
+            Matrix dI = handleInputGatePrime(dState, inputActivationMap.get(t), inputGateMap.get(t));
+
+            Matrix prevState = stateMap.containsKey(t - 1) ? stateMap.get(t - 1) : zeros;
+            Matrix dF = handleForgetGatePrime(dState, prevState, forgetGateMap.get(t));
+            Matrix dO = handleOutputGatePrime(dout, stateMap.get(t), outputGateMap.get(t));
+
+//            System.out.println("inputActivationWeight shape = " + inputActivationWeight.shape());
+//            System.out.println("inputActivationUWeight shape = " + inputActivationUWeight.shape());
+
+            List<Vector> out = new ArrayList<>();
+            Matrix features = timeStepsX.get(t);
+
+            Matrix inputActivation_DeltaUWeight = new Matrix(units, inputShape.getValue2());
+            Matrix inputGate_DeltaUWeight = new Matrix(units, inputShape.getValue2());
+            Matrix forgetGate_DeltaUWeight = new Matrix(units, inputShape.getValue2());
+            Matrix outputGate_DeltaUWeight = new Matrix(units, inputShape.getValue2());
+
+            for (int i = 0; i < numberOfSamples; i++) {
+//                System.out.println("features shape = " + features.shape());
+                Matrix x = features.getRowAsVector(i).toMatrix();
+
+                Matrix dA_sample = dA.getRowAsVector(i).toMatrix();
+                Matrix dGateStateA = dA_sample.dot(inputActivationWeight.transpose());
+                Matrix dI_sample = dI.getRowAsVector(i).toMatrix();
+                Matrix dGateStateI = dI_sample.dot(inputGateWeight.transpose());
+                Matrix dF_sample = dF.getRowAsVector(i).toMatrix();
+                Matrix dGateStateF = dF_sample.dot(forgetGateWeight.transpose());
+                Matrix dO_sample = dO.getRowAsVector(i).toMatrix();
+                Matrix dGateStateO = dO_sample.dot(outputGateWeight.transpose());
+
+                // calculate out cost to propagate
+                out.add(dGateStateA.add(dGateStateI).add(dGateStateF).add(dGateStateO).getRowAsVector(0));
+
+
+                System.out.println("dA_sample shape = " + dA_sample.shape());
+                System.out.println("x shape = " + x.shape());
+
+                inputActivation_DeltaUWeight.add(dA_sample.transpose().dot(x));
+                inputGate_DeltaUWeight.add(dI_sample.transpose().dot(x));
+                forgetGate_DeltaUWeight.add(dF_sample.transpose().dot(x));
+                outputGate_DeltaUWeight.add(dO_sample.transpose().dot(x));
+
+                System.out.println("inputActivation_DeltaUWeight shape = " + inputActivation_DeltaUWeight.shape());
+                System.out.println("inputGate_DeltaUWeight shape = " + inputGate_DeltaUWeight.shape());
+                System.out.println("forgetGate_DeltaUWeight shape = " + forgetGate_DeltaUWeight.shape());
+                System.out.println("outputGate_DeltaUWeight shape = " + outputGate_DeltaUWeight.shape());
+
+            }
+
+            futureState = dState;
+            futureOut = new Matrix(out.stream().map(v -> v.asArray()).collect(Collectors.toList()));
+
+            // update delta average weights
+            inputActivationDeltaUWeight.add(inputActivation_DeltaUWeight.divide(numberOfSamples));
+            inputGateDeltaUWeight.add(inputGate_DeltaUWeight.divide(numberOfSamples));
+            forgetGateDeltaUWeight.add(forgetGate_DeltaUWeight.divide(numberOfSamples));
+            outputGateDeltaUWeight.add(outputGate_DeltaUWeight.divide(numberOfSamples));
         }
 
 
+        System.out.println("Done ...");
         System.exit(0);
 
 
+    }
+
+    private Matrix handleOutputGatePrime(Matrix dout, Matrix state, Matrix o) {
+        int numberOfSamples = input.getDepthCount();
+        Matrix ones = new Matrix(numberOfSamples, units);
+        ones.initialize(1d);
+
+        return dout.elementWiseProduct(tanhActivation.activate(state))
+                .elementWiseProduct(o)
+                .elementWiseProduct(ones.subtract(o));
+    }
+
+    private Matrix handleForgetGatePrime(Matrix dState, Matrix prevState, Matrix f) {
+        int numberOfSamples = input.getDepthCount();
+        Matrix ones = new Matrix(numberOfSamples, units);
+        ones.initialize(1d);
+
+        return dState.elementWiseProduct(prevState)
+                .elementWiseProduct(f)
+                .elementWiseProduct(ones.subtract(f));
+    }
+
+    private Matrix handleInputGatePrime(Matrix dState, Matrix a, Matrix i) {
+        int numberOfSamples = input.getDepthCount();
+        Matrix ones = new Matrix(numberOfSamples, units);
+        ones.initialize(1d);
+
+        return dState.elementWiseProduct(a)
+                .elementWiseProduct(i)
+                .elementWiseProduct(ones.subtract(i));
+    }
+
+    private Matrix handleInputActivationPrime(Matrix dState, Matrix i, Matrix a) {
+        int numberOfSamples = input.getDepthCount();
+        Matrix ones = new Matrix(numberOfSamples, units);
+        ones.initialize(1d);
+
+        return dState.elementWiseProduct(i)
+                .elementWiseProduct(ones.subtract(a.square()));
     }
 
     private Matrix handleInputActivation(Matrix x, Matrix h_prev) {

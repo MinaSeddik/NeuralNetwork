@@ -14,8 +14,8 @@ public class Tansh extends ActivationFunction {
     @Override
     public double activate(double value) {
         // (e^x - e^-x) / (e^x + e^-x)
-        return ((Math.exp((double) value) - Math.exp((double) -value)) /
-                (Math.exp((double) value) + Math.exp((double) -value)));
+        return (Math.exp(value) - Math.exp(-value)) /
+                (Math.exp((value) + Math.exp(-value)));
     }
 
     @Override
