@@ -62,6 +62,7 @@ public class LSTM extends Layer {
     private Map<Integer, Matrix> forgetGateMap = new HashMap<>();
     private Map<Integer, Matrix> outputGateMap = new HashMap<>();
     private Map<Integer, Matrix> stateMap = new HashMap<>();
+    private Map<Integer, Matrix> outputMap = new HashMap<>();
 
     private D3Matrix input;
     private Matrix A;
@@ -209,22 +210,23 @@ public class LSTM extends Layer {
             Matrix state = ai.add(fs);
 //            System.out.println("state shape = " + state.shape());
 
+            A = tanhActivation.activate(state).elementWiseProduct(o);
+
             // save the gates and state for back-propagation
             inputActivationMap.put(t, a);
             inputGateMap.put(t, i);
             forgetGateMap.put(t, f);
             outputGateMap.put(t, o);
             stateMap.put(t, state);
-
-            A = tanhActivation.activate(state).elementWiseProduct(o);
+            outputMap.put(t, A);
 
 //            System.out.println("out shape = " + A.shape());
             prevState = state;
             h_prev = A;
         }
 
-        System.out.println("will exit in forward ....");
-        System.exit(0);
+//        System.out.println("will exit in forward ....");
+//        System.exit(0);
 
         Matrix Z = activationFunction.activate(A);
 
@@ -287,31 +289,43 @@ public class LSTM extends Layer {
             List<Vector> out = new ArrayList<>();
             Matrix features = timeStepsX.get(t);
 
+            Matrix out_t = t == 0 ? zeros : outputMap.get(t - 1);
+
             Matrix inputActivation_DeltaUWeight = new Matrix(units, inputShape.getValue2());
             Matrix inputGate_DeltaUWeight = new Matrix(units, inputShape.getValue2());
             Matrix forgetGate_DeltaUWeight = new Matrix(units, inputShape.getValue2());
             Matrix outputGate_DeltaUWeight = new Matrix(units, inputShape.getValue2());
+
+            Matrix inputActivation_DeltaWeight = new Matrix(units, units);
+            Matrix inputGate_DeltaWeight = new Matrix(units, units);
+            Matrix forgetGate_DeltaWeight = new Matrix(units, units);
+            Matrix outputGate_DeltaWeight = new Matrix(units, units);
+
+            Vector inputActivation_DeltaBias = new Vector(units);
+            Vector inputGate_DeltaBias = new Vector(units);
+            Vector forgetGate_DeltaBias = new Vector(units);
+            Vector outputGate_DeltaBias = new Vector(units);
 
             for (int i = 0; i < numberOfSamples; i++) {
 //                System.out.println("features shape = " + features.shape());
                 Matrix x = features.getRowAsVector(i).toMatrix();
 
                 Matrix dA_sample = dA.getRowAsVector(i).toMatrix();
-                Matrix dGateStateA = dA_sample.dot(inputActivationWeight.transpose());
                 Matrix dI_sample = dI.getRowAsVector(i).toMatrix();
-                Matrix dGateStateI = dI_sample.dot(inputGateWeight.transpose());
                 Matrix dF_sample = dF.getRowAsVector(i).toMatrix();
-                Matrix dGateStateF = dF_sample.dot(forgetGateWeight.transpose());
                 Matrix dO_sample = dO.getRowAsVector(i).toMatrix();
+
+                Matrix dGateStateA = dA_sample.dot(inputActivationWeight.transpose());
+                Matrix dGateStateI = dI_sample.dot(inputGateWeight.transpose());
+                Matrix dGateStateF = dF_sample.dot(forgetGateWeight.transpose());
                 Matrix dGateStateO = dO_sample.dot(outputGateWeight.transpose());
 
                 // calculate out cost to propagate
                 out.add(dGateStateA.add(dGateStateI).add(dGateStateF).add(dGateStateO).getRowAsVector(0));
 
+                System.out.println("**** dA_sample shape = " + dA_sample.shape());
 
-                System.out.println("dA_sample shape = " + dA_sample.shape());
-                System.out.println("x shape = " + x.shape());
-
+                // errors in add
                 inputActivation_DeltaUWeight.add(dA_sample.transpose().dot(x));
                 inputGate_DeltaUWeight.add(dI_sample.transpose().dot(x));
                 forgetGate_DeltaUWeight.add(dF_sample.transpose().dot(x));
@@ -322,16 +336,45 @@ public class LSTM extends Layer {
                 System.out.println("forgetGate_DeltaUWeight shape = " + forgetGate_DeltaUWeight.shape());
                 System.out.println("outputGate_DeltaUWeight shape = " + outputGate_DeltaUWeight.shape());
 
-            }
+
+                Matrix currentSample = out_t.getRowAsVector(i).toMatrix();
+                inputActivation_DeltaWeight.add(dA_sample.transpose().dot(currentSample));
+                inputGate_DeltaWeight.add(dI_sample.transpose().dot(currentSample));
+                forgetGate_DeltaWeight.add(dF_sample.transpose().dot(currentSample));
+                outputGate_DeltaWeight.add(dO_sample.transpose().dot(currentSample));
+
+                System.out.println("inputActivation_DeltaWeight shape = " + inputActivation_DeltaWeight.shape());
+                System.out.println("inputGate_DeltaWeight shape = " + inputGate_DeltaWeight.shape());
+                System.out.println("forgetGate_DeltaWeight shape = " + forgetGate_DeltaWeight.shape());
+                System.out.println("outputGate_DeltaWeight shape = " + outputGate_DeltaWeight.shape());
+
+
+                inputActivation_DeltaBias.add(dA.getRowAsVector(i));
+                inputGate_DeltaBias.add(dI.getRowAsVector(i));
+                forgetGate_DeltaBias.add(dF.getRowAsVector(i));
+                outputGate_DeltaBias.add(dO.getRowAsVector(i));
+
+            } // end loop on samples
 
             futureState = dState;
             futureOut = new Matrix(out.stream().map(v -> v.asArray()).collect(Collectors.toList()));
 
             // update delta average weights
-            inputActivationDeltaUWeight.add(inputActivation_DeltaUWeight.divide(numberOfSamples));
-            inputGateDeltaUWeight.add(inputGate_DeltaUWeight.divide(numberOfSamples));
-            forgetGateDeltaUWeight.add(forgetGate_DeltaUWeight.divide(numberOfSamples));
-            outputGateDeltaUWeight.add(outputGate_DeltaUWeight.divide(numberOfSamples));
+            inputActivationDeltaUWeight = inputActivationDeltaUWeight.add(inputActivation_DeltaUWeight.divide(numberOfSamples));
+            inputGateDeltaUWeight = inputGateDeltaUWeight.add(inputGate_DeltaUWeight.divide(numberOfSamples));
+            forgetGateDeltaUWeight = forgetGateDeltaUWeight.add(forgetGate_DeltaUWeight.divide(numberOfSamples));
+            outputGateDeltaUWeight = outputGateDeltaUWeight.add(outputGate_DeltaUWeight.divide(numberOfSamples));
+
+            inputActivationDeltaWeight = inputActivationDeltaWeight.add(inputActivation_DeltaWeight.divide(numberOfSamples));
+            inputGateDeltaWeight = inputGateDeltaWeight.add(inputGate_DeltaWeight.divide(numberOfSamples));
+            forgetGateDeltaWeight = forgetGateDeltaWeight.add(forgetGate_DeltaWeight.divide(numberOfSamples));
+            outputGateDeltaWeight = outputGateDeltaWeight.add(outputGate_DeltaWeight.divide(numberOfSamples));
+
+//            inputActivationDeltaBias = inputActivationDeltaBias.add(inputActivation_DeltaBias.divide(numberOfSamples));
+//            inputGateDeltaBias = inputGateDeltaBias.add(inputGate_DeltaBias.divide(numberOfSamples));
+//            forgetGateDeltaBias = forgetGateDeltaBias.add(forgetGate_DeltaBias.divide(numberOfSamples));
+//            outputGateDeltaBias = outputGateDeltaBias.add(outputGate_DeltaBias.divide(numberOfSamples));
+
         }
 
 
