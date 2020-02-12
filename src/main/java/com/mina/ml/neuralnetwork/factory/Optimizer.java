@@ -47,7 +47,9 @@ public class Optimizer implements Serializable {
         Matrix errorCostPrime = lossFunction.errorCostPrime(y, yPrime);
         outputLayer.backPropagation(errorCostPrime);
 
-        System.exit(0);
+//        System.out.println("hererrrrrrrrrrrrrr");
+//        System.exit(0);
+
         inputLayer.updateWeight(learningRate);
 
         return new Pair<>(loss, acc);

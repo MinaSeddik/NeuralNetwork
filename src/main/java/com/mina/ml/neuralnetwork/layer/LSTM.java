@@ -243,20 +243,20 @@ public class LSTM extends Layer {
 
         //dE/dZ
         Matrix dE_dZ = (Matrix) costPrime;
-        System.out.println("dE/dZ shape = " + dE_dZ.shape());
+//        System.out.println("dE/dZ shape = " + dE_dZ.shape());
 
         // dZ/dA
         Matrix dZ_dA = activationFunction.activatePrime(A);
-        System.out.println("dZ/dA shape = " + dZ_dA.shape());
+//        System.out.println("dZ/dA shape = " + dZ_dA.shape());
 
         // dE/dZ
         Matrix dE_dA = dE_dZ.elementWiseProduct(dZ_dA);
-        System.out.println("dE/dA shape = " + dE_dA.shape());
+//        System.out.println("dE/dA shape = " + dE_dA.shape());
 
 //        D3Matrix timeStepsX = reshapeInputPerTimeStep(input);
         int numberOfSamples = input.getDepthCount();
         int timeSteps = inputShape.getValue1();
-        System.out.println("input shape shape = " + input.shape());
+//        System.out.println("input shape shape = " + input.shape());
         D3Matrix timeStepsX = reshapeInputPerTimeStep(input);
 
         Matrix ones = new Matrix(numberOfSamples, units);
@@ -323,43 +323,48 @@ public class LSTM extends Layer {
                 // calculate out cost to propagate
                 out.add(dGateStateA.add(dGateStateI).add(dGateStateF).add(dGateStateO).getRowAsVector(0));
 
-                System.out.println("**** dA_sample shape = " + dA_sample.shape());
+//                System.out.println("**** dA_sample shape = " + dA_sample.shape());
 
                 // errors in add
-                inputActivation_DeltaUWeight.add(dA_sample.transpose().dot(x));
-                inputGate_DeltaUWeight.add(dI_sample.transpose().dot(x));
-                forgetGate_DeltaUWeight.add(dF_sample.transpose().dot(x));
-                outputGate_DeltaUWeight.add(dO_sample.transpose().dot(x));
+                inputActivation_DeltaUWeight = inputActivation_DeltaUWeight.add(dA_sample.transpose().dot(x));
+                inputGate_DeltaUWeight = inputGate_DeltaUWeight.add(dI_sample.transpose().dot(x));
+                forgetGate_DeltaUWeight = forgetGate_DeltaUWeight.add(dF_sample.transpose().dot(x));
+                outputGate_DeltaUWeight = outputGate_DeltaUWeight.add(dO_sample.transpose().dot(x));
 
-                System.out.println("inputActivation_DeltaUWeight shape = " + inputActivation_DeltaUWeight.shape());
-                System.out.println("inputGate_DeltaUWeight shape = " + inputGate_DeltaUWeight.shape());
-                System.out.println("forgetGate_DeltaUWeight shape = " + forgetGate_DeltaUWeight.shape());
-                System.out.println("outputGate_DeltaUWeight shape = " + outputGate_DeltaUWeight.shape());
+//                System.out.println("inputActivation_DeltaUWeight shape = " + inputActivation_DeltaUWeight.shape());
+//                System.out.println("inputGate_DeltaUWeight shape = " + inputGate_DeltaUWeight.shape());
+//                System.out.println("forgetGate_DeltaUWeight shape = " + forgetGate_DeltaUWeight.shape());
+//                System.out.println("outputGate_DeltaUWeight shape = " + outputGate_DeltaUWeight.shape());
 
 
                 Matrix currentSample = out_t.getRowAsVector(i).toMatrix();
-                inputActivation_DeltaWeight.add(dA_sample.transpose().dot(currentSample));
-                inputGate_DeltaWeight.add(dI_sample.transpose().dot(currentSample));
-                forgetGate_DeltaWeight.add(dF_sample.transpose().dot(currentSample));
-                outputGate_DeltaWeight.add(dO_sample.transpose().dot(currentSample));
+                inputActivation_DeltaWeight = inputActivation_DeltaWeight.add(dA_sample.transpose().dot(currentSample));
+                inputGate_DeltaWeight = inputGate_DeltaWeight.add(dI_sample.transpose().dot(currentSample));
+                forgetGate_DeltaWeight = forgetGate_DeltaWeight.add(dF_sample.transpose().dot(currentSample));
+                outputGate_DeltaWeight = outputGate_DeltaWeight.add(dO_sample.transpose().dot(currentSample));
 
-                System.out.println("inputActivation_DeltaWeight shape = " + inputActivation_DeltaWeight.shape());
-                System.out.println("inputGate_DeltaWeight shape = " + inputGate_DeltaWeight.shape());
-                System.out.println("forgetGate_DeltaWeight shape = " + forgetGate_DeltaWeight.shape());
-                System.out.println("outputGate_DeltaWeight shape = " + outputGate_DeltaWeight.shape());
+//                System.out.println("inputActivation_DeltaWeight shape = " + inputActivation_DeltaWeight.shape());
+//                System.out.println("inputGate_DeltaWeight shape = " + inputGate_DeltaWeight.shape());
+//                System.out.println("forgetGate_DeltaWeight shape = " + forgetGate_DeltaWeight.shape());
+//                System.out.println("outputGate_DeltaWeight shape = " + outputGate_DeltaWeight.shape());
 
 
-                inputActivation_DeltaBias.add(dA.getRowAsVector(i));
-                inputGate_DeltaBias.add(dI.getRowAsVector(i));
-                forgetGate_DeltaBias.add(dF.getRowAsVector(i));
-                outputGate_DeltaBias.add(dO.getRowAsVector(i));
+                inputActivation_DeltaBias = inputActivation_DeltaBias.add(dA.getRowAsVector(i));
+                inputGate_DeltaBias = inputGate_DeltaBias.add(dI.getRowAsVector(i));
+                forgetGate_DeltaBias = forgetGate_DeltaBias.add(dF.getRowAsVector(i));
+                outputGate_DeltaBias = outputGate_DeltaBias.add(dO.getRowAsVector(i));
+
+//                System.out.println("inputActivation_DeltaBias shape = " + inputActivation_DeltaBias.shape());
+//                System.out.println("inputGate_DeltaBias shape = " + inputGate_DeltaBias.shape());
+//                System.out.println("forgetGate_DeltaBias shape = " + forgetGate_DeltaBias.shape());
+//                System.out.println("outputGate_DeltaBias shape = " + outputGate_DeltaBias.shape());
 
             } // end loop on samples
 
             futureState = dState;
             futureOut = new Matrix(out.stream().map(v -> v.asArray()).collect(Collectors.toList()));
 
-            // update delta average weights
+            // update delta average weights and bias
             inputActivationDeltaUWeight = inputActivationDeltaUWeight.add(inputActivation_DeltaUWeight.divide(numberOfSamples));
             inputGateDeltaUWeight = inputGateDeltaUWeight.add(inputGate_DeltaUWeight.divide(numberOfSamples));
             forgetGateDeltaUWeight = forgetGateDeltaUWeight.add(forgetGate_DeltaUWeight.divide(numberOfSamples));
@@ -370,17 +375,21 @@ public class LSTM extends Layer {
             forgetGateDeltaWeight = forgetGateDeltaWeight.add(forgetGate_DeltaWeight.divide(numberOfSamples));
             outputGateDeltaWeight = outputGateDeltaWeight.add(outputGate_DeltaWeight.divide(numberOfSamples));
 
-//            inputActivationDeltaBias = inputActivationDeltaBias.add(inputActivation_DeltaBias.divide(numberOfSamples));
-//            inputGateDeltaBias = inputGateDeltaBias.add(inputGate_DeltaBias.divide(numberOfSamples));
-//            forgetGateDeltaBias = forgetGateDeltaBias.add(forgetGate_DeltaBias.divide(numberOfSamples));
-//            outputGateDeltaBias = outputGateDeltaBias.add(outputGate_DeltaBias.divide(numberOfSamples));
+            inputActivationDeltaBias = inputActivationDeltaBias.add(inputActivation_DeltaBias.divide(numberOfSamples));
+            inputGateDeltaBias = inputGateDeltaBias.add(inputGate_DeltaBias.divide(numberOfSamples));
+            forgetGateDeltaBias = forgetGateDeltaBias.add(forgetGate_DeltaBias.divide(numberOfSamples));
+            outputGateDeltaBias = outputGateDeltaBias.add(outputGate_DeltaBias.divide(numberOfSamples));
 
         }
 
 
-        System.out.println("Done ...");
-        System.exit(0);
+//        System.out.println("will back propagate futureOut shape = " + futureOut.shape());
+//        System.out.println("Done ...");
+//        System.exit(0);
 
+        if (!Objects.isNull(prevLayer)) {
+            prevLayer.backPropagation(futureOut);
+        }
 
     }
 
@@ -505,9 +514,22 @@ public class LSTM extends Layer {
 
     @Override
     public void updateWeight(double learningRate) {
-//        W.updateWeights(dW, learningRate);
-//        U.updateWeights(dU, learningRate);
-//        B.updateBias(dB, learningRate);
+
+        inputActivationUWeight.updateWeights(inputActivationDeltaUWeight, learningRate);
+        inputGateUWeight.updateWeights(inputGateDeltaUWeight, learningRate);
+        forgetGateUWeight.updateWeights(forgetGateDeltaUWeight, learningRate);
+        outputGateUWeight.updateWeights(outputGateDeltaUWeight, learningRate);
+
+        inputActivationWeight.updateWeights(inputActivationDeltaWeight, learningRate);
+        inputGateWeight.updateWeights(inputGateDeltaWeight, learningRate);
+        forgetGateWeight.updateWeights(forgetGateDeltaWeight, learningRate);
+        outputGateWeight.updateWeights(outputGateDeltaWeight, learningRate);
+
+        inputActivationBias.updateBias(inputActivationDeltaBias, learningRate);
+        inputGateBias.updateBias(inputGateDeltaBias, learningRate);
+        forgetGateBias.updateBias(forgetGateDeltaBias, learningRate);
+        outputGateBias.updateBias(outputGateDeltaBias, learningRate);
+
 
         if (!Objects.isNull(nextLayer)) {
             nextLayer.updateWeight(learningRate);

@@ -20,7 +20,7 @@ public class LstmSeries1 {
 
         double[] temp = new double[200];
         IntStream.range(0, 200).forEach(i -> temp[i] = i + 1);
-        IntStream.range(1, 201).forEach(i -> Y.add(new double[]{i * 15d}));
+        IntStream.range(1, 201).forEach(i -> Y.add(new double[]{i * 5d}));
 
         D3Matrix data = new Vector(temp).reshape(new Triplet<>(20, 5, 2));
 
@@ -34,7 +34,7 @@ public class LstmSeries1 {
         Tuple inputShape = new Triplet<>(0, 5, 2);
 
         Model model = new Sequential();
-        model.add(new LSTM(100, inputShape, "relu"));
+        model.add(new LSTM(10, inputShape, "relu"));
         model.add(new Dense(1, "relu"));
 
         model.summary(line -> System.out.println(line));
@@ -43,7 +43,7 @@ public class LstmSeries1 {
         Optimizer optimizer = new Optimizer(learningRate);
         model.compile(optimizer, "MeanSquaredError", "");
 
-        model.fit(X, Y, 0.1f, true, 128, 300, Verbosity.VERBOSE, null);
+        model.fit(X, Y, 0.1f, false, 128, 300, Verbosity.VERBOSE, null);
 
 //        Pair<Double, Double> testStats = model.evaluate(xTest, yTest);
 //        double test_acc = testStats.getValue1();

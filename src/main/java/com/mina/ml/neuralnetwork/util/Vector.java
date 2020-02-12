@@ -93,11 +93,14 @@ public class Vector extends Tensor {
         return getSize() == vec.getSize();
     }
 
-//    public void divide(double val) {
-//        for (int i = 0; i < collection.length; i++) {
-//            collection[i] /= val;
-//        }
-//    }
+    public Vector divide(double val) {
+        double[] result = new double[collection.length];
+        for (int i = 0; i < collection.length; i++) {
+            result[i] = collection[i] / val;
+        }
+
+        return new Vector(result);
+    }
 
     public Matrix reshape(Pair<Integer, Integer> shape) {
         int n = shape.getValue0();
@@ -134,6 +137,12 @@ public class Vector extends Tensor {
         return new D3Matrix(result);
     }
 
-    public void add(Vector rowAsVector) {
+    public Vector add(Vector vector) {
+        double[] result = new double[collection.length];
+        for(int i=0;i<collection.length;i++){
+            result[i] = collection[i] + vector.collection[i];
+        }
+
+        return new Vector(result);
     }
 }
