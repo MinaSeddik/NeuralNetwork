@@ -50,7 +50,7 @@ public class D4MatrixTest {
             System.out.println("forwardPropagation::--> P shape" + P.shape());
             Matrix KP = K.dot(P);
             System.out.println("forwardPropagation:: KP shape" + KP.shape());
-            System.exit(0);
+//            System.exit(0);
         }
     }
 

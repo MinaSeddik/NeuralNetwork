@@ -1,6 +1,11 @@
 package com.mina.examples.mnist;
 
+
+import org.apache.commons.io.IOUtils;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -31,8 +36,48 @@ public class MNistReader {
         return labels;
     }
 
+    public static int[] getLabelsFromStream(InputStream is) throws IOException {
+
+//        ByteBuffer bb = loadFileToByteBuffer(infile);
+
+
+        byte[] bytes = IOUtils.toByteArray(is);
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
+
+        assertMagicNumber(LABEL_FILE_MAGIC_NUMBER, bb.getInt());
+
+        int numLabels = bb.getInt();
+        int[] labels = new int[numLabels];
+
+        for (int i = 0; i < numLabels; ++i)
+            labels[i] = bb.get() & 0xFF; // To unsigned
+
+        return labels;
+    }
+
     public static List<int[][]> getImages(String infile) {
         ByteBuffer bb = loadFileToByteBuffer(infile);
+
+        assertMagicNumber(IMAGE_FILE_MAGIC_NUMBER, bb.getInt());
+
+        int numImages = bb.getInt();
+        int numRows = bb.getInt();
+        int numColumns = bb.getInt();
+        List<int[][]> images = new ArrayList<>();
+
+        for (int i = 0; i < numImages; i++)
+            images.add(readImage(numRows, numColumns, bb));
+
+        return images;
+    }
+
+    public static List<int[][]> getImagesFromStream(InputStream is) throws IOException {
+//        ByteBuffer bb = loadFileToByteBuffer(infile);
+
+
+        byte[] bytes = IOUtils.toByteArray(is);
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
+
 
         assertMagicNumber(IMAGE_FILE_MAGIC_NUMBER, bb.getInt());
 

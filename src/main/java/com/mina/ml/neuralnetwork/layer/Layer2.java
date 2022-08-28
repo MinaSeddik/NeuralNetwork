@@ -79,9 +79,7 @@ public abstract class Layer2 {
     protected void calculateDeltaWeight(double[][] costOutputPrime) {
         // make sure that both of them has the same row ( # of examples)
         assert (costOutputPrime.length == input.length);
-
         assert (deltaWeight.length == input[0].length);
-        assert (deltaWeight[0].length == costOutputPrime.length);
 
         // reset delta weights
         MatrixManipulator.initializeMatrix(deltaWeight, 0d);
@@ -118,6 +116,10 @@ public abstract class Layer2 {
             // prepare the costPrime for the previous layer for cost error back propagation
             double[][] weightTranspose = MatrixManipulator.transposeMatrix(weight);
             costPrime = MatrixManipulator.multiply(costOutputPrime, weightTranspose);
+
+//            System.out.println("costOutputPrime: " + costOutputPrime.length + ", " + costOutputPrime[0].length);
+//            System.out.println("weightTranspose: " + weightTranspose.length + ", " + weightTranspose[0].length);
+//            System.out.println("costPrime: " + costPrime.length + ", " + costPrime[0].length);
 //            MatrixManipulator.debugMatrix(layerName + " costPrime: ", costPrime);
 
             // eliminate the first col as it is for bias

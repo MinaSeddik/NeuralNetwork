@@ -42,7 +42,7 @@ public class Main {
             NeuralNetwork neuralNetwork = new NeuralNetwork(configuration);
 
             neuralNetwork.fetchDataSet(x, y);
-            //neuralNetwork.train();
+            neuralNetwork.train();
 
         } catch (Exception e) {
             e.printStackTrace();
